@@ -61,19 +61,19 @@ class Spinner():
     def _generate_sequence_list(self):
         return [self.seq[i:i+self.div] for i in range(0, len(self.seq), self.div)]
 
-            
-class JsonFromatError(Exception):
-    def __init__(self, error_type, element, message = 'Invalid json format'):
-        if error_type == 'keys':
-            self.message = message + f'\n  key error: on {element}\n'
-        if error_type == 'seq':
-            self.message = message + f'\n  value error for "seq" expected str on: {element}\n'
-        if error_type == 'div':
-            self.message = message + f'\n  value error for "div" expected int on: {element}\n'
-        else:  
-            self.message == "Unkown Error"
 
-        super().__init__(self.message)
+class JsonFromatError(Exception):
+    def __init__(self, key, element):
+        messages = { 'seq' : 'value error for "seq" expected str',
+                     'div' : 'value error for "div" expected int',
+                     'key' : 'key error'}
+        
+        if key in messages:
+            self.message = messages[key]
+        else:
+            self.message = 'unknown error'
+
+        super().__init__('Invalid json format\n  ' + self.message + f' on: {element}\n')
 
 
         
