@@ -1,0 +1,11 @@
+{
+    "testspinner": {
+        "seq": "12345",
+        "div": 1
+    },
+    "fakespinner": {
+        "seq": "12345",
+        "div": "as"
+    },
+    "wrongspinner": {}
+}
