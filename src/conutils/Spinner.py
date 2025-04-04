@@ -43,6 +43,10 @@ class Spinner():
             del cls._spinners[spn_type]
 
     @classmethod
+    def reset_spinners(cls):
+        cls._spinners = {"default" : cls._default_spinner.copy()}
+
+    @classmethod
     def load_json(cls, file: str, replace = False):
         """json file format as follows: {spinner_name : {"seq" : str, "div" : int}}
 
@@ -111,5 +115,3 @@ class FormatError(Exception):
 class DivisionError(Exception):
     def __init__(self, element):
         super().__init__(f'\n  sequence needs to be divisible by divider\non: {element}')
-
-Spinner.load_json("src/conutils/test.json")
