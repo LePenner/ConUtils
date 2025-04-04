@@ -12,6 +12,7 @@ class Spinner():
         self.seq = Spinner._spinners[spn_type]["seq"]
         self.div = Spinner._spinners[spn_type]["div"]
         self.seq_list = self._generate_sequence_list()
+        self.spn_pos = 0
 
     _default_spinner = {"seq" : '|/-\\',
                         "div" : 1}
