@@ -19,6 +19,10 @@ class Spinner():
 
 
     @classmethod
+    def get_spinners(cls):
+        return cls._spinners.copy()
+
+    @classmethod
     def reg_spn_type(cls, spn_type: str, seq: str, div: int, replace=False):
         if spn_type in cls._spinners and not replace:
             raise SpinnerTypeError('dupl_type', spn_type)
@@ -88,7 +92,6 @@ class SpinnerTypeError(Exception):
             message = messages[key]
         else:
             message = 'unknown error'
-
 
         super().__init__(f'Invalid spinner type\n  ' + message + f'\non: {element}\n')
 
