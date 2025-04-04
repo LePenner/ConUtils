@@ -1,2 +1,4 @@
-/dist
-**/test.json
+dist/
+tests/
+__pycache__/
+test.json
