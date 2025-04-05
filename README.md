@@ -10,5 +10,9 @@ Currently implemented:
 ## to-do:
 ### Spinner
 
-- make json import and export of spinner available
 - implement Spinner class into Console class
+
+### Console
+
+- add Screen and Line Classes
+- define a calss for Elements, that can be added to Screen and Line, maybe Inherit Element for Screen and Line?
