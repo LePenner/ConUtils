@@ -5,15 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "conutils"
 version = "0.0.1"
-authors = [
-  { name="Kira", email="monoclecatstudio@gmail.com" },
-]
+authors = [{ name = "Kira", email = "monoclecatstudio@gmail.com" }]
 description = "a collection of console output fomating methods"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
 ]
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
