@@ -16,11 +16,11 @@ class Spinner(Entity):
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
 
-        self._spn_type = spn_type
-        self._seq = Spinner._spinners[spn_type]["seq"]
-        self._div = Spinner._spinners[spn_type]["div"]
-        self._seq_list = self._generate_sequence_list()
-        self._spn_pos = 0
+        self.spn_type = spn_type
+        self.seq = Spinner._spinners[spn_type]["seq"]
+        self.div = Spinner._spinners[spn_type]["div"]
+        self.seq_list = self._generate_sequence_list()
+        self.spn_pos = 0
 
         super().__init__(parent, x, y, width, height)
 
