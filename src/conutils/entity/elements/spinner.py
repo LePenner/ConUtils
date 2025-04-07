@@ -1,23 +1,32 @@
+from __future__ import annotations
 import json
+from conutils.entity.entity import Entity
+from typing import TYPE_CHECKING
 
-class Spinner():
-    def __init__(self, spn_type = 'default'):
+
+if TYPE_CHECKING:
+    from conutils.entity.container.container import Container
+
+
+class Spinner(Entity):
+    def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         """specify a type of spinner to initiate, loads it from dict: spinners
         if no type is specified 'default' type is used
         """
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
 
-        self.spn_type = spn_type
-        self.seq = Spinner._spinners[spn_type]["seq"]
-        self.div = Spinner._spinners[spn_type]["div"]
-        self.seq_list = self._generate_sequence_list()
-        self.spn_pos = 0
+        self._spn_type = spn_type
+        self._seq = Spinner._spinners[spn_type]["seq"]
+        self._div = Spinner._spinners[spn_type]["div"]
+        self._seq_list = self._generate_sequence_list()
+        self._spn_pos = 0
 
-    _default_spinner = {"seq" : '|/-\\',
-                        "div" : 1}
-    _spinners = {"default" : _default_spinner.copy()}
+        super().__init__(parent, x, y, width, height)
 
+    _default_spinner = {"seq": '|/-\\',
+                        "div": 1}
+    _spinners = {"default": _default_spinner.copy()}
 
     @classmethod
     def get_spinners(cls):
@@ -29,15 +38,15 @@ class Spinner():
             raise SpinnerTypeError('dupl_type', spn_type)
         elif len(seq) % div != 0:
             raise DivisionError(spn_type)
-        
-        cls._spinners[spn_type] = {"seq" : seq, 
-                                  "div" : div }
-    
+
+        cls._spinners[spn_type] = {"seq": seq,
+                                   "div": div}
+
     @classmethod
     def del_spn_type(cls, spn_type: str):
         if spn_type not in cls._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
-        
+
         if spn_type == "default":
             cls._spinners["default"] = cls._default_spinner.copy()
         else:
@@ -45,10 +54,10 @@ class Spinner():
 
     @classmethod
     def reset_spinners(cls):
-        cls._spinners = {"default" : cls._default_spinner.copy()}
+        cls._spinners = {"default": cls._default_spinner.copy()}
 
     @classmethod
-    def load_json(cls, file: str, replace = False):
+    def load_json(cls, file: str, replace=False):
         """json file format as follows: {spinner_name : {"seq" : str, "div" : int}}
 
         replace toggles between keeping an already existing spinner or overwriting it.
@@ -68,12 +77,13 @@ class Spinner():
                     raise FormatError('div', spinner)
             else:
                 raise FormatError('keys', spinner)
-            
+
         # if format is correct
         for spinner, values in loaded_file.items():
             if spinner in cls._spinners and not replace:
                 continue  # skip duplicates
-            cls.reg_spn_type(spinner, values["seq"], values["div"], replace=True)
+            cls.reg_spn_type(
+                spinner, values["seq"], values["div"], replace=True)
 
     def change_spn_to(self, spn_type: str):
         if spn_type not in Spinner._spinners:
@@ -90,29 +100,34 @@ class Spinner():
 
 class SpinnerTypeError(Exception):
     def __init__(self, key, element):
-        messages = { 'msng_type' : 'type does not exist',
-                     'dupl_type' : 'type already exists, consider: replace=True'}
+        messages = {'msng_type': 'type does not exist',
+                    'dupl_type': 'type already exists, consider: replace=True'}
 
         if key in messages:
             message = messages[key]
         else:
             message = 'unknown error'
 
-        super().__init__(f'Invalid spinner type\n  ' + message + f'\non: {element}\n')
+        super().__init__(f'Invalid spinner type\n  ' +
+                         message + f'\non: {element}\n')
+
 
 class FormatError(Exception):
     def __init__(self, key, element):
-        messages = { 'seq'  : 'value error for "seq" expected str',
-                     'div'  : 'value error for "div" expected int',
-                     'keys' : 'key error'}
+        messages = {'seq': 'value error for "seq" expected str',
+                    'div': 'value error for "div" expected int',
+                    'keys': 'key error'}
 
         if key in messages:
             message = messages[key]
         else:
             message = 'unknown error'
 
-        super().__init__(f'invalid JSON format\n  ' + message + f'\non: {element}\n')
+        super().__init__(f'invalid JSON format\n  ' +
+                         message + f'\non: {element}\n')
+
 
 class DivisionError(Exception):
     def __init__(self, element):
-        super().__init__(f'\n  sequence needs to be divisible by divider\non: {element}')
+        super().__init__(
+            f'\n  sequence needs to be divisible by divider\non: {element}')
