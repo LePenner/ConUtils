@@ -1,7 +1,14 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from conutils.entity.container.container import Container
+
+
 class Entity():
     """standard class for containers, text objects, etc."""
 
-    def __init__(self, parent, x, y, width, height):
+    def __init__(self, parent: Container | None, x, y, width, height):
         self.parent = None
         self._width = width
         self._height = height

@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from conutils.entity.entity import Entity, StructureError
 
 
 class Container(Entity):
     """ simple container class with child/parent logic"""
 
-    def __init__(self, parent: Entity | None = None, x=0, y=0, width=0, height=0):
+    def __init__(self, parent: Container | None = None, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         # initialize object
         self.children = []
         super().__init__(parent, x, y, width, height)
