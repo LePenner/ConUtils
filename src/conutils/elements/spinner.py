@@ -1,12 +1,18 @@
 import json
+from conutils.elements import Element
 
-class Spinner():
-    def __init__(self, spn_type = 'default'):
+class Spinner(Element):
+    def __init__(self, spn_type='default', x=0, y=0, parent=None):
         """specify a type of spinner to initiate, loads it from dict: spinners
         if no type is specified 'default' type is used
         """
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
+
+        super().__init__(x,y,parent)
+        self.x = x
+        self.y = y
+        self.parent = parent
 
         self.spn_type = spn_type
         self.seq = Spinner._spinners[spn_type]["seq"]
@@ -116,3 +122,7 @@ class FormatError(Exception):
 class DivisionError(Exception):
     def __init__(self, element):
         super().__init__(f'\n  sequence needs to be divisible by divider\non: {element}')
+
+spn = Spinner(x=10,y=5)
+
+print(spn.x)
