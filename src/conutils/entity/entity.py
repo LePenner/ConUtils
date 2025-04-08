@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 class Entity:
     """standard class for containers, text objects, etc."""
 
-    def __init__(self, parent: Container | None, x: int, y: int, width: int, height: int, **kwargs):
+    def __init__(self, parent: Container | None, x: int, y: int, width: int, height: int):
         self._parent = None
         self._width = width
         self._height = height
@@ -23,8 +23,6 @@ class Entity:
         self._set_heigth(height)
         self.set_x(x)
         self.set_y(y)
-
-        super().__init__(**kwargs)
 
     # ----- setter: position -----
 

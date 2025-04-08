@@ -1,17 +1,16 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import json
-from conutils.entity.entity import Entity
-from conutils.entity.elements.animated import Animated
+from conutils.entity.elements.element import Animated
 
 if TYPE_CHECKING:
     from conutils.entity.container.container import Container
 
 
-class Spinner(Entity, Animated):
+class Spinner(Animated):
     """Spinner class can be used as standalone or in conjunction with a container"""
 
-    def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 1000):
+    def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 100):
         """specify a type of spinner to initiate, loads it from dict: spinners
         if no type is specified 'default' type is used
         """
@@ -21,10 +20,8 @@ class Spinner(Entity, Animated):
         self._spn_type = spn_type
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
-        self._spn_pos = 0
 
-        super().__init__(parent=parent, x=x, y=y,
-                         width=self._div, height=1, frames=self._generate_frames(), frametime=frametime)
+        super().__init__(parent, x, y, self._generate_frames(), frametime)
 
     _default_spinner = {"seq": '|/-\\',
                         "div": 1}
