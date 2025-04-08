@@ -12,7 +12,7 @@ class Container(Entity):
 
     # make height setter public
     def set_height(self, height):
-        return self._set_height(height)
+        return self._set_heigth(height)
 
     # make width setter public
     def set_width(self, width):

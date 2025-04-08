@@ -26,7 +26,7 @@ class Animated:
 
     def draw_next(self):
         self._cur += 1
-        if self._cur >= len(self._seq):
+        if self._cur >= len(self._frames):
             self._cur = 0
 
         return self._frames[self._cur]
