@@ -2,7 +2,7 @@ import os
 import asyncio
 
 from conutils.entity.container.container import Container
-from conutils.entity.elements.animated import Animated
+from conutils.entity.elements.element import Animated
 
 
 class Console(Container):
@@ -31,8 +31,9 @@ class Console(Container):
                 return child._children
 
     @staticmethod
-    def draw(Entity):
-        return print()
+    def draw(entity):
+        print(f"\033[{entity.get_y_abs()};{entity.get_x_abs()}H", end="")
+        print(str(entity), end="", flush=True)
 
     def run(self):
         os.system('cls')
@@ -41,6 +42,7 @@ class Console(Container):
             asyncio.run(self._run_async())
         except KeyboardInterrupt:
             self.show_cursor()
+            os.system('cls')
 
     async def _run_async(self):
 
@@ -53,11 +55,11 @@ class Console(Container):
 
         # check for updates
         while True:
-            await asyncio.sleep(0.008)
+            await asyncio.sleep(0.0001)
             for child in children:
                 if hasattr(child, '_animation_loop'):
                     if child.get_draw_flag() == True:
                         child.reset_drawflag()
-                        print(child.draw_next(), end='\r')
+                        child.draw_next()
 
-                    pass
+                self.draw(child)
