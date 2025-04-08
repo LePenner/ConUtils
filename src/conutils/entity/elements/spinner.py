@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 
 
 class Spinner(Entity):
+    """Spinner class can be used as standalone or in conjunction with a container"""
+
     def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, width: int = 0, height: int = 0):
         """specify a type of spinner to initiate, loads it from dict: spinners
         if no type is specified 'default' type is used
@@ -16,11 +18,11 @@ class Spinner(Entity):
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
 
-        self.spn_type = spn_type
-        self.seq = Spinner._spinners[spn_type]["seq"]
-        self.div = Spinner._spinners[spn_type]["div"]
-        self.seq_list = self._generate_sequence_list()
-        self.spn_pos = 0
+        self._spn_type = spn_type
+        self._seq = Spinner._spinners[spn_type]["seq"]
+        self._div = Spinner._spinners[spn_type]["div"]
+        self._seq_list = self._generate_sequence_list()
+        self._spn_pos = 0
 
         super().__init__(parent, x, y, width, height)
 
@@ -85,17 +87,27 @@ class Spinner(Entity):
             cls.reg_spn_type(
                 spinner, values["seq"], values["div"], replace=True)
 
+    def get_spn_state(self):
+        return self._seq_list[self._spn_pos]
+
+    def draw_next(self):
+        if self._spn_pos >= len(self._seq) - 1:
+            self._spn_pos = 0
+        else:
+            self._spn_pos += 1
+        return self._seq_list[self._spn_pos]
+
     def change_spn_to(self, spn_type: str):
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
 
-        self.spn_type = spn_type
-        self.seq = Spinner._spinners[spn_type]["seq"]
-        self.div = Spinner._spinners[spn_type]["div"]
-        self.seq_list = Spinner._generate_sequence_list(self)
+        self._spn_type = spn_type
+        self._seq = Spinner._spinners[spn_type]["seq"]
+        self._div = Spinner._spinners[spn_type]["div"]
+        self._seq_list = Spinner._generate_sequence_list(self)
 
     def _generate_sequence_list(self):
-        return [self.seq[i:i+self.div] for i in range(0, len(self.seq), self.div)]
+        return [self._seq[i:i+self._div] for i in range(0, len(self._seq), self._div)]
 
 
 class SpinnerTypeError(Exception):

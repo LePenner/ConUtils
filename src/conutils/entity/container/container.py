@@ -7,33 +7,32 @@ class Container(Entity):
     """simple container class with child/parent logic"""
 
     def __init__(self, parent: Container | None = None, x: int = 0, y: int = 0, width: int = 0, height: int = 0):
-        # initialize object
-        self.children = []
+        self._children = []
         super().__init__(parent, x, y, width, height)
 
     def add_child(self, child, replace=False):
         if child._parent and not replace:
             raise StructureError('parent double')
-        self.children.append(child)
+        self._children.append(child)
         child._parent = self
 
     def remove_child(self, child):
-        if child not in self.children:
+        if child not in self._children:
             raise StructureError('child not found')
-        self.children.remove(child)
+        self._children.remove(child)
         child._parent = None
 
     def set_parent(self, parent: Container | None = None, replace=False):
-        if parent in self.children and not replace:
+        if parent in self._children and not replace:
             raise StructureError('incest')
 
-        if parent in self.children:
-            self.children.remove(parent)
+        if parent in self._children:
+            self._children.remove(parent)
         if parent:
             if parent._parent == self:
                 parent._parent = None
             self._parent = parent
-            parent.children.append(self)
+            parent._children.append(self)
 
     def get_parent(self):
         return self._parent
