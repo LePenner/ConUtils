@@ -1,17 +1,17 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 import json
 from conutils.entity.entity import Entity
-from typing import TYPE_CHECKING
-
+from conutils.entity.elements.animated import Animated
 
 if TYPE_CHECKING:
     from conutils.entity.container.container import Container
 
 
-class Spinner(Entity):
+class Spinner(Entity, Animated):
     """Spinner class can be used as standalone or in conjunction with a container"""
 
-    def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, width: int = 0, height: int = 0):
+    def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 1000):
         """specify a type of spinner to initiate, loads it from dict: spinners
         if no type is specified 'default' type is used
         """
@@ -21,10 +21,10 @@ class Spinner(Entity):
         self._spn_type = spn_type
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
-        self._seq_list = self._generate_sequence_list()
         self._spn_pos = 0
 
-        super().__init__(parent, x, y, width, height)
+        super().__init__(parent=parent, x=x, y=y,
+                         width=self._div, height=1, frames=self._generate_frames(), frametime=frametime)
 
     _default_spinner = {"seq": '|/-\\',
                         "div": 1}
@@ -87,16 +87,6 @@ class Spinner(Entity):
             cls.reg_spn_type(
                 spinner, values["seq"], values["div"], replace=True)
 
-    def get_spn_state(self):
-        return self._seq_list[self._spn_pos]
-
-    def draw_next(self):
-        if self._spn_pos >= len(self._seq) - 1:
-            self._spn_pos = 0
-        else:
-            self._spn_pos += 1
-        return self._seq_list[self._spn_pos]
-
     def change_spn_to(self, spn_type: str):
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
@@ -104,9 +94,9 @@ class Spinner(Entity):
         self._spn_type = spn_type
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
-        self._seq_list = Spinner._generate_sequence_list(self)
+        self._frames = Spinner._generate_frames(self)
 
-    def _generate_sequence_list(self):
+    def _generate_frames(self):
         return [self._seq[i:i+self._div] for i in range(0, len(self._seq), self._div)]
 
 

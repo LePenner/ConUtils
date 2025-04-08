@@ -5,10 +5,10 @@ if TYPE_CHECKING:
     from conutils.entity.container.container import Container
 
 
-class Entity():
+class Entity:
     """standard class for containers, text objects, etc."""
 
-    def __init__(self, parent: Container | None, x: int, y: int, width: int, height: int):
+    def __init__(self, parent: Container | None, x: int, y: int, width: int, height: int, **kwargs):
         self._parent = None
         self._width = width
         self._height = height
@@ -19,10 +19,12 @@ class Entity():
             parent.add_child(self)
             self._parent = parent
 
-        self.set_width(width)
-        self.set_heigth(height)
+        self._set_width(width)
+        self._set_heigth(height)
         self.set_x(x)
         self.set_y(y)
+
+        super().__init__(**kwargs)
 
     # ----- setter: position -----
 
@@ -70,19 +72,19 @@ class Entity():
 
     # ----- setter: dimension -----
 
-    def set_width(self, width):
+    def _set_width(self, width):
         if self._parent:
             if self._parent.get_width() < self._x + width:
                 raise StructureError('edge conflict')
         self._width = width
 
-    def set_heigth(self, height):
+    def _set_heigth(self, height):
         if self._parent:
             if self._parent.get_height() < self._y + height:
                 raise StructureError('edge conflict')
         self._height = height
 
-    def set_dimensions(self, width, height):
+    def _set_dimensions(self, width, height):
         self.set_width(width)
         self.set_heigth(height)
 
