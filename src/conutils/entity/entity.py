@@ -85,8 +85,8 @@ class Entity:
         self._height = height
 
     def _set_dimensions(self, width, height):
-        self.set_width(width)
-        self.set_heigth(height)
+        self._set_width(width)
+        self._set_heigth(height)
 
     # ----- getter: dimension -----
 
