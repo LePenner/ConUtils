@@ -10,9 +10,8 @@ Currently implemented:
 ## to-do:
 ### Spinner
 
-- implement Spinner class into Console class
-
+- implement multi line spinners
 ### Console
 
 - add Screen and Line Classes
-- define a calss for Elements, that can be added to Screen and Line, maybe Inherit Element for Screen and Line?
+- check for clashing, make toggle to allow clashing in container class
