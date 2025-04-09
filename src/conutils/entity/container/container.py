@@ -1,9 +1,6 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
-    from conutils.entity.elements.element import Element
-
+from conutils.entity.elements.element import Element
 from conutils.entity.entity import Entity, StructureError
 
 

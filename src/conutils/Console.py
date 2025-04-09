@@ -5,8 +5,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from conutils.entity.entity import Entity
-    from conutils.entity.elements.element import Animated
 
+
+from conutils.entity.elements.element import Animated
 from conutils.entity.container.container import Container
 # from conutils.entity.entity import StructureError
 
