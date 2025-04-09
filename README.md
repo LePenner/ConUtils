@@ -10,8 +10,8 @@ Currently implemented:
 ## to-do:
 ### Spinner
 
-- implement multi line spinners
+- implement multi line spinners/animations
 ### Console
 
 - add Screen and Line Classes
-- check for clashing, make toggle to allow clashing in container class
+- switch to use @property decorator
