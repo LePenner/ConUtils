@@ -1,4 +1,8 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from conutils.entity.elements.element import Element
 
 from conutils.entity.entity import Entity, StructureError
 
@@ -6,45 +10,71 @@ from conutils.entity.entity import Entity, StructureError
 class Container(Entity):
     """simple container class with child/parent logic"""
 
-    def __init__(self, parent: Container | None = None, x: int = 0, y: int = 0, width: int = 1, height: int = 1):
-        self._children = []
+    def __init__(self, parent: Container | None = None,
+                 x: int = 0, y: int = 0, width: int = 1, height: int = 1,
+                 overlap: bool = False):
+        self._children: list[Entity] = []
+        self._overlap = overlap
         super().__init__(parent, x, y, width, height)
 
-    # make height setter public
-    def set_height(self, height):
+    # ----- make dimension setter/getter public -----
+
+    def set_height(self, height: int):
         return self._set_heigth(height)
 
-    # make width setter public
-    def set_width(self, width):
+    def set_width(self, width: int):
         return self._set_width(width)
 
-    # make dimension setters public
-    def set_dimensions(self, width, height):
+    def set_dimensions(self, width: int, height: int):
         return self._set_dimensions(width, height)
 
-    def add_child(self, child, replace=False):
+    # ----- child logic -----
+
+    def _collect_children(self) -> list[Element]:
+        result: list[Element] = []
+
+        for child in self._children:
+            if isinstance(child, Container):
+                result.extend(child._collect_children())
+            else:
+                if isinstance(child, Element):
+                    result.append(child)
+        return result
+
+    def _overlap_check(self, add_child: Entity):
+
+        r1_x = range(
+            add_child._x, add_child._x+add_child._width)
+        r1_y = range(
+            add_child._y, add_child._y+add_child._height)
+
+        for child in self._children:
+            r2_x = range(
+                child._x, child._x+child._width)
+            r2_y = range(
+                child._y, child._y+child._height)
+
+            if not self._overlap\
+                    and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
+                    and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
+                raise StructureError('child overlap')
+
+    def add_child(self, child: Entity, replace: bool = False):
+        self._overlap_check(child)
         if child._parent and not replace:
             raise StructureError('parent double')
         self._children.append(child)
         child._parent = self
 
-    def remove_child(self, child):
+    def remove_child(self, child: Entity):
         if child not in self._children:
             raise StructureError('child not found')
         self._children.remove(child)
         child._parent = None
 
-    def _collect_children(self):
-        result = []
+    # ----- parent logic -----
 
-        for child in self._children:
-            if hasattr(child, '_children'):
-                result.extend(child._collect_children())
-            else:
-                result.append(child)
-        return result
-
-    def set_parent(self, parent: Container | None = None, replace=False):
+    def set_parent(self, parent: Container | None = None, replace: bool = False):
         if parent in self._children and not replace:
             raise StructureError('incest')
 
@@ -55,6 +85,3 @@ class Container(Entity):
                 parent._parent = None
             self._parent = parent
             parent._children.append(self)
-
-    def get_parent(self):
-        return self._parent

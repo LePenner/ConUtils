@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 import json
 from conutils.entity.elements.element import Animated
 
@@ -10,7 +10,8 @@ if TYPE_CHECKING:
 class Spinner(Animated):
     """Spinner class can be used as standalone or in conjunction with a container"""
 
-    def __init__(self, parent: Container | None = None, spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 100):
+    def __init__(self, parent: Container | None = None,
+                 spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 100):
         """specify a type of spinner to initiate, loads it from dict: spinners
         if no type is specified 'default' type is used
         """
@@ -21,18 +22,23 @@ class Spinner(Animated):
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
 
-        super().__init__(parent, x, y, self._generate_frames(), frametime)
+        super().__init__(parent, x, y, self._div, 1, self._generate_frames(), frametime)
 
-    _default_spinner = {"seq": '|/-\\',
-                        "div": 1}
-    _spinners = {"default": _default_spinner.copy()}
+    class SpinnerDict(TypedDict):
+        seq: str
+        div: int
+
+    _default_spinner: SpinnerDict = {"seq": '|/-\\',
+                                     "div": 1}
+    _spinners: dict[str, SpinnerDict] = {
+        "default": _default_spinner.copy()}
 
     @classmethod
     def get_spinners(cls):
         return cls._spinners.copy()
 
     @classmethod
-    def reg_spn_type(cls, spn_type: str, seq: str, div: int, replace=False):
+    def reg_spn_type(cls, spn_type: str, seq: str, div: int, replace:bool=False):
         if spn_type in cls._spinners and not replace:
             raise SpinnerTypeError('dupl_type', spn_type)
         elif len(seq) % div != 0:
@@ -56,7 +62,7 @@ class Spinner(Animated):
         cls._spinners = {"default": cls._default_spinner.copy()}
 
     @classmethod
-    def load_json(cls, file: str, replace=False):
+    def load_json(cls, file: str, replace:bool=False):
         """json file format as follows: {spinner_name : {"seq" : str, "div" : int}}
 
         replace toggles between keeping an already existing spinner or overwriting it.
@@ -98,7 +104,7 @@ class Spinner(Animated):
 
 
 class SpinnerTypeError(Exception):
-    def __init__(self, key, element):
+    def __init__(self, key:str, element:str):
         messages = {'msng_type': 'type does not exist',
                     'dupl_type': 'type already exists, consider: replace=True'}
 
@@ -112,7 +118,7 @@ class SpinnerTypeError(Exception):
 
 
 class FormatError(Exception):
-    def __init__(self, key, element):
+    def __init__(self, key:str, element:str):
         messages = {'seq': 'value error for "seq" expected str',
                     'div': 'value error for "div" expected int',
                     'keys': 'key error'}
@@ -127,6 +133,6 @@ class FormatError(Exception):
 
 
 class DivisionError(Exception):
-    def __init__(self, element):
+    def __init__(self, element:str):
         super().__init__(
             f'\n  sequence needs to be divisible by divider\non: {element}')

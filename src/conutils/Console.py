@@ -1,20 +1,27 @@
+from __future__ import annotations
 import os
 import asyncio
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from conutils.entity.entity import Entity
+    from conutils.entity.elements.element import Animated
 
 from conutils.entity.container.container import Container
-from conutils.entity.elements.element import Animated
+# from conutils.entity.entity import StructureError
 
 
 class Console(Container):
     """Console handles the output of any child screens and lines to the terminal."""
 
-    def __init__(self):
+    def __init__(self, overlap: bool = False):
         self._children = []
         super().__init__(parent=None,
                          x=0,
                          y=0,
                          width=os.get_terminal_size()[0],
-                         height=os.get_terminal_size()[1])
+                         height=os.get_terminal_size()[1],
+                         overlap=overlap)
 
     @staticmethod
     def hide_cursor():
@@ -25,15 +32,12 @@ class Console(Container):
         print('\033[?25h', end="")
 
     @staticmethod
-    def _get_animated_obj(children):
-        for child in children:
-            if child:
-                return child._children
+    def draw(entity: Entity):
 
-    @staticmethod
-    def draw(entity):
-        print(f"\033[{entity.get_y_abs()};{entity.get_x_abs()}H", end="")
-        print(str(entity), end="", flush=True)
+        # terminal starts at 1,1
+        print(
+            f"\033[{entity.get_y_abs()+1};{entity.get_x_abs()+1}H", end="")
+        print(entity, end="", flush=True)
 
     def run(self):
         os.system('cls')
@@ -50,14 +54,14 @@ class Console(Container):
 
         # start all loops
         for child in children:
-            if hasattr(child, '_animation_loop'):
-                asyncio.create_task(child._animation_loop())
+            if isinstance(child, Animated):
+                asyncio.create_task(child._animation_loop())  # type: ignore
 
         # check for updates
         while True:
             await asyncio.sleep(0.0001)
             for child in children:
-                if hasattr(child, '_animation_loop'):
+                if isinstance(child, Animated):
                     if child.get_draw_flag() == True:
                         child.reset_drawflag()
                         child.draw_next()
