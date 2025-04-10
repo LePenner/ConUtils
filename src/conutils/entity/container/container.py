@@ -32,8 +32,8 @@ class Container(Entity):
 
     @Entity.dimensions.setter
     def dimensions(self, width: int, height: int):
-        self.width = width
-        self.heigth = height
+        self._width = width
+        self._height = height
 
     # ----- properties -----
 

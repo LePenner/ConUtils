@@ -6,7 +6,13 @@ if TYPE_CHECKING:
 
 
 class Entity:
-    """standard class for containers, text objects, etc."""
+    """Defines standard for containers, text objects, etc.
+    
+    Interface
+        methods:
+            - 
+
+    """
 
     def __init__(self, parent: Container | None,
                  x: int, y: int, width: int, height: int):
@@ -21,14 +27,14 @@ class Entity:
             self._parent = parent
 
     def __set_width(self, width: int):
-        if self.parent and hasattr(self, '_x'):
-            if self.parent.width < self._x + width:
+        if self.parent and hasattr(self, 'x'):
+            if self.parent.width < self.x + width:
                 raise StructureError('edge conflict')
         self._width = width
 
     def __set_heigth(self, height: int):
-        if self.parent and hasattr(self, '_y'):
-            if self.parent.height < self._y + height:
+        if self.parent and hasattr(self, 'y'):
+            if self.parent.height < self.y + height:
                 raise StructureError('edge conflict')
         self._height = height
 
