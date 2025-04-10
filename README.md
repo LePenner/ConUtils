@@ -14,4 +14,3 @@ Currently implemented:
 ### Console
 
 - add Screen and Line Classes
-- switch to use @property decorator

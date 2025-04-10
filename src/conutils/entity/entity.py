@@ -11,91 +11,98 @@ class Entity:
     def __init__(self, parent: Container | None,
                  x: int, y: int, width: int, height: int):
         self._parent = parent
-        self.set_x(x)
-        self.set_y(y)
-        self._set_width(width)
-        self._set_heigth(height)
+        self._x = x
+        self._y = y
+        self.__set_width(width)
+        self.__set_heigth(height)
 
         if parent:
             parent.add_child(self, replace=True)
             self._parent = parent
 
-    # ----- setter: position -----
-
-    def set_x(self, x: int):
-        if self._parent and hasattr(self, '_width'):
-            if self._parent.get_width() < self._width + x:
-                raise StructureError('edge conflict')
-        self._x = x
-
-    def set_y(self, y: int):
-        if self._parent and hasattr(self, '_height'):
-            if self._parent.get_height() < self._height + self._y:
-                raise StructureError('edge conflict')
-        self._y = y
-
-    def move(self, x: int, y: int):
-        self.set_x(x)
-        self.set_y(y)
-
-    # ----- getter: position -----
-
-    def get_x(self) -> int:
-        return self._x
-
-    def get_y(self) -> int:
-        return self._y
-
-    def get_pos(self) -> tuple[int, int]:
-        return ((self._x, self._y))
-
-    def get_x_abs(self) -> int:
-        if self._parent:
-            return self._parent.get_x_abs() + self._x
-        else:
-            return self._x
-
-    def get_y_abs(self) -> int:
-        if self._parent:
-            return self._parent.get_y_abs() + self._y
-        else:
-            return self._y
-
-    def get_abs_pos(self) -> tuple[int, int]:
-        return ((self.get_x_abs(), self.get_y_abs()))
-
-    # ----- setter: dimension -----
-
-    def _set_width(self, width: int):
-        if self._parent and hasattr(self, '_x'):
-            if self._parent.get_width() < self._x + width:
+    def __set_width(self, width: int):
+        if self.parent and hasattr(self, '_x'):
+            if self.parent.width < self._x + width:
                 raise StructureError('edge conflict')
         self._width = width
 
-    def _set_heigth(self, height: int):
-        if self._parent and hasattr(self, '_y'):
-            if self._parent.get_height() < self._y + height:
+    def __set_heigth(self, height: int):
+        if self.parent and hasattr(self, '_y'):
+            if self.parent.height < self._y + height:
                 raise StructureError('edge conflict')
         self._height = height
 
-    def _set_dimensions(self, width: int, height: int):
-        self._set_width(width)
-        self._set_heigth(height)
+    # ----- position -----
 
-    # ----- getter: dimension -----
+    @property
+    def x(self) -> int:
+        return self._x
 
-    def get_width(self):
-        return self._width
+    @property
+    def y(self) -> int:
+        return self._y
 
-    def get_height(self):
+    @property
+    def pos(self) -> tuple[int, int]:
+        return ((self._x, self._y))
+
+    @property
+    def x_abs(self) -> int:
+        if self.parent:
+            return self.parent.x_abs + self._x
+        else:
+            return self._x
+
+    @property
+    def y_abs(self) -> int:
+        if self.parent:
+            return self.parent.y_abs + self.y
+        else:
+            return self.y
+
+    @property
+    def abs_pos(self) -> tuple[int, int]:
+        return ((self.x_abs, self.y_abs))
+
+    # ----- setter: position -----
+
+    @x.setter
+    def x(self, x: int):
+        if self.parent and hasattr(self, 'width'):
+            if self._parent.width < self.width + x:
+                raise StructureError('edge conflict')
+        self._x = x
+
+    @y.setter
+    def y(self, y: int):
+        if self.parent and hasattr(self, 'height'):
+            if self.parent.height < self.height + self.y:
+                raise StructureError('edge conflict')
+        self._y = y
+
+    @pos.setter
+    def pos(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    # ----- dimension -----
+
+    @property
+    def height(self):
         return self._height
 
-    def get_dimensions(self):
-        return ((self._width, self._height))
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def dimensions(self):
+        return ((self.width, self.height))
 
     # ----- misc -----
 
-    def get_parent(self):
+    @property
+    def parent(self):
         return self._parent
 
 

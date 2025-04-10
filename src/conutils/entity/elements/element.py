@@ -38,7 +38,7 @@ class Element(Entity):
 
     def __str__(self):
         # for right indentation on every line
-        return self._str.format(x=self.get_x_abs())
+        return self._str.format(x=self.gx_abs)
 
 
 class Animated(Element):

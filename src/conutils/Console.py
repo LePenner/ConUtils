@@ -37,7 +37,7 @@ class Console(Container):
 
         # terminal starts at 1,1
         print(
-            f"\033[{entity.get_y_abs()+1};{entity.get_x_abs()+1}H", end="")
+            f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
         print(entity, end="", flush=True)
 
     def run(self):

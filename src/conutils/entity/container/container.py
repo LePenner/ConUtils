@@ -14,16 +14,26 @@ class Container(Entity):
         self._overlap = overlap
         super().__init__(parent, x, y, width, height)
 
-    # ----- make dimension setter/getter public -----
+    # ----- make dimension setter public -----
 
-    def set_height(self, height: int):
-        return self._set_heigth(height)
+    @Entity.width.setter
+    def width(self, width: int):
+        if self._parent and hasattr(self, '_x'):
+            if self._parent.width < self._x + width:
+                raise StructureError('edge conflict')
+        self._width = width
 
-    def set_width(self, width: int):
-        return self._set_width(width)
+    @Entity.height.setter
+    def height(self, height: int):
+        if self._parent and hasattr(self, '_y'):
+            if self._parent.height < self._y + height:
+                raise StructureError('edge conflict')
+        self._height = height
 
-    def set_dimensions(self, width: int, height: int):
-        return self._set_dimensions(width, height)
+    @Entity.dimensions.setter
+    def dimensions(self, width: int, height: int):
+        self.width = width
+        self.heigth = height
 
     # ----- child logic -----
 
