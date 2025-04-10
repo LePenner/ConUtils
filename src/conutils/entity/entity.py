@@ -69,7 +69,7 @@ class Entity:
     @x.setter
     def x(self, x: int):
         if self.parent and hasattr(self, 'width'):
-            if self._parent.width < self.width + x:
+            if self.parent.width < self.width + x:
                 raise StructureError('edge conflict')
         self._x = x
 
@@ -88,11 +88,11 @@ class Entity:
     # ----- dimension -----
 
     @property
-    def height(self):
+    def height(self) -> int:
         return self._height
 
     @property
-    def width(self):
+    def width(self) -> int:
         return self._width
 
     @property

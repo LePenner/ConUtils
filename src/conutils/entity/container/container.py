@@ -17,16 +17,16 @@ class Container(Entity):
     # ----- make dimension setter public -----
 
     @Entity.width.setter
-    def width(self, width: int):
-        if self._parent and hasattr(self, '_x'):
-            if self._parent.width < self._x + width:
+    def width(self, width: int) -> int | None:
+        if self.parent and hasattr(self, 'x'):
+            if self.parent.width < self.x + width:
                 raise StructureError('edge conflict')
         self._width = width
 
     @Entity.height.setter
-    def height(self, height: int):
-        if self._parent and hasattr(self, '_y'):
-            if self._parent.height < self._y + height:
+    def height(self, height: int) -> int | None:
+        if self.parent and hasattr(self, 'y'):
+            if self.parent.height < self.y + height:
                 raise StructureError('edge conflict')
         self._height = height
 
@@ -34,6 +34,12 @@ class Container(Entity):
     def dimensions(self, width: int, height: int):
         self.width = width
         self.heigth = height
+
+    # ----- properties -----
+
+    @property
+    def children(self) -> list[Entity]:
+        return self._children
 
     # ----- child logic -----
 

@@ -17,6 +17,7 @@ class Element(Entity):
 
         self._str = ''  # no error if representation is empty
 
+        # move to text when implemented
         width = 0
         if representation:
             for l in representation:
@@ -38,7 +39,7 @@ class Element(Entity):
 
     def __str__(self):
         # for right indentation on every line
-        return self._str.format(x=self.gx_abs)
+        return self._str.format(x=self.x_abs)
 
 
 class Animated(Element):
@@ -60,7 +61,8 @@ class Animated(Element):
             await asyncio.sleep(self._frametime)
             self._draw = True
 
-    def get_draw_flag(self) -> bool:
+    @property
+    def draw_flag(self) -> bool:
         return self._draw
 
     def reset_drawflag(self):

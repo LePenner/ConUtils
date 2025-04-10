@@ -63,7 +63,7 @@ class Console(Container):
             await asyncio.sleep(0.0001)
             for child in children:
                 if isinstance(child, Animated):
-                    if child.get_draw_flag() == True:
+                    if child.draw_flag == True:
                         child.reset_drawflag()
                         child.draw_next()
 
