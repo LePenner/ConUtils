@@ -6,11 +6,14 @@ ConUtils is a simple toolkit designed to beautify your console and provide essen
 Currently implemented:
 
 - Spinner
+- Containers
+- Console
 
 ## to-do:
 ### Spinner
 
 - implement multi line spinners/animations
+
 ### Console
 
 - add Screen and Line Classes
