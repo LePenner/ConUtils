@@ -52,5 +52,42 @@ introducing minimalist principles, to inforce these values.
     
 - ### Packages
 
-    - to be expanded on
+    - may define an `Exposes` section
+
+        ```python
+        # package/
+
+        """Contains different kinds of spells, all making use of :class:`Spell`
+
+        Exposes
+            Classes
+                - Arcana
+                - Fire
+                - Mele
+        """
+
+        from .arcana import Arcana
+        from .fire import Fire
+        from .mele import Mele
+
+        __all__ = ["Arcana", "Fire", "Mele"]
+        ```
+
+    - #### note the import structure:
+        - packages should **only** expose the interface, **not** take in arguments 
+        - dependencies are declared on a per file basis via **relative import** 
+        
+
+            ```python
+            # package/arcana.py
+
+            from .. import Spell
+
+            class Arcana(Spell):
+                def __init__(self, ...)
+                # ...
+            ```
+    
+    
+
 
