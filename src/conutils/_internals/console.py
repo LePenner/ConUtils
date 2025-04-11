@@ -54,6 +54,7 @@ class Console(Container):
         # start all loops
         for child in children:
             if isinstance(child, Animated):
+                # _animation_loop() is protected
                 asyncio.create_task(child._animation_loop())  # type: ignore
 
         # check for updates
