@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from conutils.entity.container.container import Container
+    from .container import Container
 
 
 class Entity:
-    """Defines standard for containers, text objects, etc.
-    
+    """**Internal baseclass**
+    Defines standard for containers, text objects, etc.
+
     Interface
         methods:
             - 

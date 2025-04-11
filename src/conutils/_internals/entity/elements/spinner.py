@@ -2,10 +2,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 import json
 
-from conutils.entity.elements.element import Animated
+from .element import Animated
 
 if TYPE_CHECKING:
-    from conutils.entity.container.container import Container
+    from ..container import Container
 
 
 class Spinner(Animated):

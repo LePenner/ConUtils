@@ -4,12 +4,10 @@ import asyncio
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from conutils.entity.entity import Entity
+    from .entity import Entity
 
-
-from conutils.entity.elements.element import Animated
-from conutils.entity.container.container import Container
-# from conutils.entity.entity import StructureError
+from .entity.container import Container
+from .entity.elements import Animated
 
 
 class Console(Container):

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from conutils.entity.elements.element import Element
-from conutils.entity.entity import Entity, StructureError
-
+from ..entity import Entity, StructureError
+from ..elements import Element
 
 class Container(Entity):
     """simple container class with child/parent logic"""
@@ -31,9 +30,9 @@ class Container(Entity):
         self._height = height
 
     @Entity.dimensions.setter
-    def dimensions(self, width: int, height: int):
-        self._width = width
-        self._height = height
+    def dimensions(self, cords: tuple[int, int]):
+        self._width = cords[0]
+        self._height = cords[1]
 
     # ----- properties -----
 

@@ -2,10 +2,10 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from conutils.entity.entity import Entity
+from ..entity import Entity
 
 if TYPE_CHECKING:
-    from conutils.entity.container.container import Container
+    from ..container import Container
 
 
 class Element(Entity):
@@ -14,19 +14,17 @@ class Element(Entity):
     def __init__(self, representation: list[str] | None,
                  parent: Container | None = None,
                  x: int = 0, y: int = 0, width: int = 0, height: int = 0):
-
-        self._str = ''  # no error if representation is empty
-
+        self._str = ""
         # move to text when implemented
         width = 0
         if representation:
             for l in representation:
                 if not l.isprintable():
                     raise Exception()
-                if not self._str:
+                if self._str == "":
                     self._str = l
                 else:
-                    self._str += '\n\033[{x}C'+l
+                    self._str += '\n\033[{x}{direction}'+l
 
                 if len(l) > width:
                     width = len(l)
@@ -39,7 +37,10 @@ class Element(Entity):
 
     def __str__(self):
         # for right indentation on every line
-        return self._str.format(x=self.x_abs)
+        if self.x_abs > 0:
+            return self._str.format(x=self.x_abs, direction="C")
+        else:
+            return self._str.format(x=self.x_abs, direction="D")
 
 
 class Animated(Element):
