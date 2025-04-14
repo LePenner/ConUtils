@@ -1,10 +1,10 @@
 from __future__ import annotations
-import os
-import asyncio
 from typing import TYPE_CHECKING
-
 if TYPE_CHECKING:
     from .entity import Entity
+
+import os
+import asyncio
 
 from .entity.container import Container
 from .entity.elements import Animated
@@ -15,6 +15,7 @@ class Console(Container):
 
     def __init__(self, overlap: bool = False):
         self._children = []
+
         super().__init__(parent=None,
                          x=0,
                          y=0,
@@ -31,6 +32,10 @@ class Console(Container):
         print('\033[?25h', end="")
 
     @staticmethod
+    def clear_console():
+        print("\033[2J")
+
+    @staticmethod
     def _draw(entity: Entity):
 
         # terminal starts at 1,1
@@ -39,13 +44,13 @@ class Console(Container):
         print(entity, end="", flush=True)
 
     def run(self):
-        os.system('cls')
+        print("\033[2J")
         self.hide_cursor()
         try:
             asyncio.run(self._run_async())
         except KeyboardInterrupt:
             self.show_cursor()
-            os.system('cls')
+            print("\033[2J")
 
     async def _run_async(self):
 
