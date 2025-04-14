@@ -14,17 +14,20 @@ class Entity:
             - 
     """
 
+    # @constructor
     def __init__(self, parent: Container | None,
                  x: int, y: int, width: int, height: int):
         self._parent = parent
-        self._x = x
-        self._y = y
         self.__set_width(width)
         self.__set_heigth(height)
+        self._x = x
+        self._y = y
 
         if parent:
             parent.add_child(self, replace=True)
             self._parent = parent
+
+        self._overlap_check()
 
     def __set_width(self, width: int):
         if self.parent and hasattr(self, 'x'):
@@ -38,81 +41,7 @@ class Entity:
                 raise StructureError('edge conflict')
         self._height = height
 
-    # ----- position -----
-
-    @property
-    def x(self) -> int:
-        return self._x
-
-    @property
-    def y(self) -> int:
-        return self._y
-
-    @property
-    def pos(self) -> tuple[int, int]:
-        return ((self._x, self._y))
-
-    @property
-    def x_abs(self) -> int:
-        if self.parent:
-            return self.parent.x_abs + self._x
-        else:
-            return self._x
-
-    @property
-    def y_abs(self) -> int:
-        if self.parent:
-            return self.parent.y_abs + self.y
-        else:
-            return self.y
-
-    @property
-    def abs_pos(self) -> tuple[int, int]:
-        return ((self.x_abs, self.y_abs))
-
-    # ----- setter: position -----
-
-    @x.setter
-    def x(self, x: int):
-        if self.parent and hasattr(self, 'width'):
-            if self.parent.width < self.width + x:
-                raise StructureError('edge conflict')
-        self._x = x
-        self._overlap_check()
-
-    @y.setter
-    def y(self, y: int):
-        if self.parent and hasattr(self, 'height'):
-            if self.parent.height < self.height + self.y:
-                raise StructureError('edge conflict')
-        self._y = y
-        self._overlap_check()
-
-    @pos.setter
-    def pos(self, x: int, y: int):
-        self.x = x
-        self.y = y
-
-    # ----- dimension -----
-
-    @property
-    def height(self) -> int:
-        return self._height
-
-    @property
-    def width(self) -> int:
-        return self._width
-
-    @property
-    def dimensions(self):
-        return ((self.width, self.height))
-
-    # ----- misc -----
-
-    @property
-    def parent(self):
-        return self._parent
-
+    # @protected
     def _overlap_check(self):
 
         if self.parent:
@@ -137,6 +66,74 @@ class Entity:
                         and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
                         and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
                     raise Exception('child overlap')
+
+    # @public
+    @property
+    def x(self) -> int:
+        return self._x
+
+    @x.setter
+    def x(self, x: int):
+        if self.parent and hasattr(self, 'width'):
+            if self.parent.width < self.width + x:
+                raise StructureError('edge conflict')
+        self._x = x
+        self._overlap_check()
+
+    @property
+    def y(self) -> int:
+        return self._y
+
+    @y.setter
+    def y(self, y: int):
+        if self.parent and hasattr(self, 'height'):
+            if self.parent.height < self.height + self.y:
+                raise StructureError('edge conflict')
+        self._y = y
+        self._overlap_check()
+
+    @property
+    def pos(self) -> tuple[int, int]:
+        return ((self._x, self._y))
+
+    @pos.setter
+    def pos(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    @property
+    def x_abs(self) -> int:
+        if self.parent:
+            return self.parent.x_abs + self._x
+        else:
+            return self._x
+
+    @property
+    def y_abs(self) -> int:
+        if self.parent:
+            return self.parent.y_abs + self.y
+        else:
+            return self.y
+
+    @property
+    def abs_pos(self) -> tuple[int, int]:
+        return ((self.x_abs, self.y_abs))
+
+    @property
+    def height(self) -> int:
+        return self._height
+
+    @property
+    def width(self) -> int:
+        return self._width
+
+    @property
+    def dimensions(self):
+        return ((self.width, self.height))
+
+    @property
+    def parent(self):
+        return self._parent
 
 
 class StructureError(Exception):

@@ -23,6 +23,7 @@ class Container(Entity):
             if self.parent.width < self.x + width:
                 raise StructureError('edge conflict')
         self._width = width
+        self._overlap_check()
 
     @Entity.height.setter
     def height(self, height: int) -> int | None:
@@ -30,6 +31,7 @@ class Container(Entity):
             if self.parent.height < self.y + height:
                 raise StructureError('edge conflict')
         self._height = height
+        self._overlap_check()
 
     @Entity.dimensions.setter
     def dimensions(self, cords: tuple[int, int]):
