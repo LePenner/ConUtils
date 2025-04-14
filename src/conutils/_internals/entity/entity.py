@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 
 class Entity:
-    """**Internal baseclass**
+    """Internal baseclass
     Defines standard for containers, text objects, etc.
 
     Interface
@@ -78,6 +78,7 @@ class Entity:
             if self.parent.width < self.width + x:
                 raise StructureError('edge conflict')
         self._x = x
+        self._overlap_check()
 
     @y.setter
     def y(self, y: int):
@@ -85,6 +86,7 @@ class Entity:
             if self.parent.height < self.height + self.y:
                 raise StructureError('edge conflict')
         self._y = y
+        self._overlap_check()
 
     @pos.setter
     def pos(self, x: int, y: int):
@@ -110,6 +112,31 @@ class Entity:
     @property
     def parent(self):
         return self._parent
+
+    def _overlap_check(self):
+
+        if self.parent:
+            r1_x = range(
+                self.x, self.x+self._width)
+            r1_y = range(
+                self.y, self.y+self._height)
+
+            comp: list[Entity] = self.parent.children.copy()
+            comp.remove(self)
+
+            for child in comp:
+                r2_x = range(
+                    child.x, child.x+child._width)
+                r2_y = range(
+                    child.y, child.y+child._height)
+
+                print(r1_x, r1_y)
+                print(r2_x, r2_y)
+
+                if not self.parent.overlap\
+                        and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
+                        and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
+                    raise Exception('child overlap')
 
 
 class StructureError(Exception):

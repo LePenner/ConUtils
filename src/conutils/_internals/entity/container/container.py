@@ -1,7 +1,9 @@
 from __future__ import annotations
+from xmlrpc.client import boolean
 
 from ..entity import Entity, StructureError
 from ..elements import Element
+
 
 class Container(Entity):
     """simple container class with child/parent logic"""
@@ -40,6 +42,10 @@ class Container(Entity):
     def children(self) -> list[Entity]:
         return self._children
 
+    @property
+    def overlap(self) -> boolean:
+        return self._overlap
+
     # ----- child logic -----
 
     def _collect_children(self) -> list[Element]:
@@ -53,26 +59,8 @@ class Container(Entity):
                     result.append(child)
         return result
 
-    def _overlap_check(self, add_child: Entity):
-
-        r1_x = range(
-            add_child._x, add_child._x+add_child._width)
-        r1_y = range(
-            add_child._y, add_child._y+add_child._height)
-
-        for child in self._children:
-            r2_x = range(
-                child._x, child._x+child._width)
-            r2_y = range(
-                child._y, child._y+child._height)
-
-            if not self._overlap\
-                    and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
-                    and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
-                raise StructureError('child overlap')
-
     def add_child(self, child: Entity, replace: bool = False):
-        self._overlap_check(child)
+        self._overlap_check()
         if child._parent and not replace:
             raise StructureError('parent double')
         self._children.append(child)
