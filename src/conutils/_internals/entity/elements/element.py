@@ -11,36 +11,19 @@ if TYPE_CHECKING:
 class Element(Entity):
     """only use as abstract class, cannot handle dynamic heigth and width adjustment"""
 
-    def __init__(self, representation: list[str] | None,
-                 parent: Container | None = None,
-                 x: int = 0, y: int = 0, width: int = 0, height: int = 0):
-        self._str = ""
-        # move to text when implemented
-        width = 0
-        if representation:
-            for l in representation:
-                if not l.isprintable():
-                    raise Exception()
-                if self._str == "":
-                    self._str = l
-                else:
-                    self._str += '\n\033[{x}{direction}'+l
-
-                if len(l) > width:
-                    width = len(l)
-            height = len(representation)
-        else:
-            width = 1
-            height = 1
+    def __init__(self,
+                 parent: Container | None,
+                 x: int, y: int, width: int, height: int):
 
         super().__init__(parent, x, y, width, height)
 
-    def __str__(self):
-        # for right indentation on every line
-        if self.x_abs > 0:
-            return self._str.format(x=self.x_abs, direction="C")
-        else:
-            return self._str.format(x=self.x_abs, direction="D")
+    @property
+    def color(self):
+        pass
+
+    @color.setter
+    def color(self):
+        pass
 
 
 class Animated(Element):
@@ -52,7 +35,7 @@ class Animated(Element):
         self._frametime = frametime / 1000  # frametime in milliseconds
         self._cur = 0
         self._draw = False
-        super().__init__(None, parent, x, y, width, height)
+        super().__init__(parent, x, y, width, height)
 
     def __str__(self):
         return self._frames[self._cur]
