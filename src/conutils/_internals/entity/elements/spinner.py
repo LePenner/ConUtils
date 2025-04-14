@@ -21,8 +21,7 @@ class Spinner(Animated):
 
     def __init__(self, parent: Container | None = None,
                  spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 100):
-        """
-        """
+
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
 

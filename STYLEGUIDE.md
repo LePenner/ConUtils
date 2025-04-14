@@ -2,7 +2,7 @@
 
 ## General 
 
-Follow PEP8 standards on a basic level, pythonic code is encuraged - use a tool,
+Follow PEP8 standards on a basic level, pythonic code is encuraged - use a tool
 like autopep8. Strict type checking is enforced, 
 exceptions are evaluated on a per case basis.
 
@@ -86,9 +86,69 @@ exceptions are evaluated on a per case basis.
         ```
 
     #### notes
-    - docmarkings **are** optional but nice to have 
+    - docindicators are **optional** but nice to have 
     - the above example has no `private` section and thus does not
     add the `# @private` indicator
+
+    ### Code Structure
+
+    This section is the most subject to change as the codebase grows and
+    new methods might serve the purpose better.
+
+    #### File Structure
+
+    **Any** module includes an `__init__.py` regardles of actual need for one.
+    Modules with the **most widespread use** are to be placed near the **top**
+    of the file structure. Modules integral to **core functionality** might
+    also be placed further **up**, to indicate their importance.
+    Modules primarily using functionality of a given **parent module** might
+    be grouped in a folder **inside** the parent module.
+
+    ```
+    src/project/
+    ├── magic/                         
+    │   ├── spells/
+    │   │   ├── __init__.py
+    │   │   └── fireball.py
+    │   ├── __init__.py
+    │   └── magic.py   
+    ...
+    ```
+
+    #### Packages
+
+    The `__init__.py` file of any given package only exposes attributes
+    from **inside** the module, this is done for ease of use.
+    You **shall not** import in the `__init__.py` an attribute from outside
+    the module. Files inside the module also **shall not** make use of the
+    exposed parts defined in `__init__.py` and instead use relative imports.
+    `__init__.py` files shall include the **relative file path** as a top comment.
+
+    ```python 
+    # project/magic/__init__.py
+    """Magic docstring
+    
+    @Exposes
+        classes
+            - :class: Magic
+    """
+
+    from .magic import Magic
+
+    __all__ = ["Magic"]
+    ```
+
+    ```python 
+    # src/project/magic/spells/fireball.py
+    """Magic docstring
+    
+    """
+
+    from ..magic import Magic
+
+
+    ```
+
 ---         
 
 # Docstring Styleguide
@@ -167,8 +227,8 @@ and `monospace` for anything in code eg. methods, variables, classes...
         ```
 
     - #### note the import structure:
-        - packages should **only** expose the interface, **not** take in arguments 
-        - dependencies are declared on a per file basis via **relative import** 
+        - packages should **only** expose the interface, **not** take in arguments,
+        thus dependencies are declared on a per file basis via **relative import** 
         
 
             ```python

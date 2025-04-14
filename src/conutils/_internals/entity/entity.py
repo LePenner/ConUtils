@@ -12,7 +12,6 @@ class Entity:
     Interface
         methods:
             - 
-
     """
 
     def __init__(self, parent: Container | None,

@@ -1,4 +1,4 @@
-# Console Utils (ConUtils)
+# Console Utilities (ConUtils)
 
 Hai :3 
 
@@ -10,9 +10,9 @@ Currently implemented:
 - Console
 
 ## to-do:
-### Spinner
 
 - implement multi line spinners/animations
+- add colors
 
 ### Console
 
