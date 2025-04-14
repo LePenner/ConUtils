@@ -24,33 +24,31 @@ class Console(Container):
                          overlap=overlap)
 
     @staticmethod
+    def _draw(entity: Entity):
+        # terminal starts at 1,1
+        print(f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
+        print(entity, end="", flush=True)
+
+    @staticmethod
     def hide_cursor():
-        print('\033[?25l', end="")
+        print('\033[?25l', end="", flush=True)
 
     @staticmethod
     def show_cursor():
-        print('\033[?25h', end="")
+        print('\033[?25h')
 
     @staticmethod
     def clear_console():
-        print("\033[2J")
-
-    @staticmethod
-    def _draw(entity: Entity):
-
-        # terminal starts at 1,1
-        print(
-            f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
-        print(entity, end="", flush=True)
+        print("\033[2J", end="", flush=True)
 
     def run(self):
-        print("\033[2J")
+        self.clear_console()
         self.hide_cursor()
         try:
             asyncio.run(self._run_async())
         except KeyboardInterrupt:
             self.show_cursor()
-            print("\033[2J")
+            self.clear_console()
 
     async def _run_async(self):
 
