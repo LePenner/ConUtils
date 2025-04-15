@@ -8,6 +8,7 @@ import asyncio
 
 from .entity.container import Container
 from .entity.elements import Animated
+from .color import Colors
 
 
 class Console(Container):
@@ -40,6 +41,10 @@ class Console(Container):
     @staticmethod
     def clear_console():
         print("\033[2J", end="", flush=True)
+
+    @staticmethod
+    def set_color(color: str):
+        print("\033[38;2;{};{};{}m".format(*Colors.color(color)))
 
     def run(self):
         self.clear_console()
