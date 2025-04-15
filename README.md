@@ -2,6 +2,8 @@
 
 Hai :3 
 
+Terminal needs ANSI support!
+
 ConUtils is a simple toolkit designed to beautify your console and provide essential utilities for script development.
 Currently implemented:
 
@@ -12,7 +14,7 @@ Currently implemented:
 ## to-do:
 
 - implement multi line spinners/animations
-- add colors
+- add Frame class for containers
 
 ### Console
 

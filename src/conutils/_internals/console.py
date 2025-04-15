@@ -54,6 +54,7 @@ class Console(Container):
         except KeyboardInterrupt:
             self.show_cursor()
             self.clear_console()
+            self.set_color("light_gray")
 
     async def _run_async(self):
 
