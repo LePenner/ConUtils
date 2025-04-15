@@ -39,7 +39,13 @@ class Console(Container):
 
     @staticmethod
     def clear_console():
-        print("\033[2J", end="", flush=True)
+        match os.name:
+            case "nt":
+                os.system("cls")
+            case "posix":
+                os.system("clear")
+            case _:
+                print("\033[2J", end="", flush=True)
 
     def run(self):
         self.clear_console()
