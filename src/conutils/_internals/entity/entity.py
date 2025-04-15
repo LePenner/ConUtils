@@ -59,9 +59,6 @@ class Entity:
                 r2_y = range(
                     child.y, child.y+child._height)
 
-                print(r1_x, r1_y)
-                print(r2_x, r2_y)
-
                 if not self.parent.overlap\
                         and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
                         and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:

@@ -21,7 +21,6 @@ class Colors:
         "green": (0, 255, 0),
         "navy_blue": (0, 0, 128),
         "gold": (255, 215, 0),
-
         "light_gray": (211, 211, 211),
         "olive": (128, 128, 0),
         "blue_green": (0, 128, 128),
@@ -32,7 +31,7 @@ class Colors:
         "deep_purple": (75, 0, 130),
         "beige": (245, 245, 220),
         "light_pink": (255, 182, 193),
-        "brick_red": (203, 65, 84),
+        "red": (203, 65, 84),
         "sky_blue": (135, 206, 250),
         "soft_purple": (218, 112, 214),
         "mint": (189, 252, 201),
@@ -54,8 +53,3 @@ class Colors:
             return cls._colors[color]
         else:
             raise TypeError("Color does not exist")
-
-
-print("\033[38;2;{};{};{}m".format(*Colors.color("purple")))
-
-print("das ist ein test")

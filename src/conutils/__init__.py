@@ -17,7 +17,8 @@ like `Spinner` and `Text` as children, to display them.
 
 # pulls API components diretly
 from ._internals import Console
+from ._internals import Colors
 from ._internals.entity.elements import Spinner, StaticText
 from ._internals.entity.container import Container
 
-__all__ = ["Container", "Spinner", "StaticText", "Console"]
+__all__ = ["Container", "Spinner", "StaticText", "Console", "Colors"]
