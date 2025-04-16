@@ -8,7 +8,7 @@ import asyncio
 
 from .entity.container import Container
 from .entity.elements import Animated
-from .color import Colors
+from .format.toolkit import Colors
 
 
 class Console(Container):
@@ -49,6 +49,10 @@ class Console(Container):
                 print("\033[2J", end="", flush=True)
 
     @staticmethod
+    def reset_format():
+        print("\033[0m")
+
+    @staticmethod
     def set_color(color: str):
         print("\033[38;2;{};{};{}m".format(*Colors.color(color)))
 
@@ -60,7 +64,7 @@ class Console(Container):
         except KeyboardInterrupt:
             self.show_cursor()
             self.clear_console()
-            self.set_color("light_gray")
+            self.reset_format()
 
     async def _run_async(self):
 
