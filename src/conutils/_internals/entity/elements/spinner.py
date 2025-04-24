@@ -19,8 +19,15 @@ class Spinner(Animated):
         or, for larger scale imports: `json_load()`.
     """
 
-    def __init__(self, parent: Container | None = None,
-                 spn_type: str = 'default', x: int = 0, y: int = 0, frametime: int = 100):
+    def __init__(self,
+                 parent: Container | None = None,
+                 spn_type: str = 'default',
+                 x: int = 0,
+                 y: int = 0,
+                 frametime: int = 100,
+                 bold: bool = False,
+                 italic: bool = False,
+                 color: tuple[int, int, int] | None = None):
 
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
@@ -29,7 +36,7 @@ class Spinner(Animated):
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
 
-        super().__init__(parent, x, y, self._div, 1, self._generate_frames(), frametime)
+        super().__init__(parent, x, y, self._div, 1, self._generate_frames(), frametime, bold, italic, color)
 
     class SpinnerDict(TypedDict):
         seq: str

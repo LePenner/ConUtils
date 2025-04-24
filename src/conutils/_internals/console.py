@@ -8,7 +8,7 @@ import asyncio
 
 from .entity.container import Container
 from .entity.elements import Animated
-from .format.toolkit import Colors
+from .toolkit import Color
 
 
 class Console(Container):
@@ -54,7 +54,8 @@ class Console(Container):
 
     @staticmethod
     def set_color(color: str):
-        print("\033[38;2;{};{};{}m".format(*Colors.color(color)))
+        r, g, b = Color[color]
+        print(f"\033[38;2;{r};{g};{b}m")
 
     def run(self):
         self.clear_console()

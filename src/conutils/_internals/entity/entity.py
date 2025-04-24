@@ -15,13 +15,25 @@ class Entity:
     """
 
     # @constructor
-    def __init__(self, parent: Container | None,
-                 x: int, y: int, width: int, height: int):
+    def __init__(self,
+                 parent: Container | None,
+                 x: int,
+                 y: int,
+                 width: int,
+                 height: int,
+                 bold: bool,
+                 italic: bool,
+                 color: tuple[int, int, int] | None):
         self._parent = parent
         self.__set_width(width)
         self.__set_heigth(height)
         self._x = x
         self._y = y
+        self.bold = bold
+        self.italic = italic
+
+        # needs checks
+        self._color = color
 
         if parent:
             parent.add_child(self, replace=True)
@@ -127,6 +139,14 @@ class Entity:
     @property
     def dimensions(self):
         return ((self.width, self.height))
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, color: tuple[int, int, int] | None):
+        pass
 
     @property
     def parent(self):

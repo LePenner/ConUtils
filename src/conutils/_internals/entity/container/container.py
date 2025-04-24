@@ -8,12 +8,20 @@ from ..elements import Element
 class Container(Entity):
     """simple container class with child/parent logic"""
 
-    def __init__(self, parent: Container | None = None,
-                 x: int = 0, y: int = 0, width: int = 1, height: int = 1,
-                 overlap: bool = False):
+    def __init__(self,
+                 parent: Container | None = None,
+                 x: int = 0,
+                 y: int = 0,
+                 width: int = 1,
+                 height: int = 1,
+                 overlap: bool = False,
+                 bold: bool = False,
+                 italic: bool = False,
+                 color: tuple[int, int, int] | None = None):
+        
         self._children: list[Entity] = []
         self._overlap = overlap
-        super().__init__(parent, x, y, width, height)
+        super().__init__(parent, x, y, width, height, bold, italic, color)
 
     # ----- make dimension setter public -----
 
