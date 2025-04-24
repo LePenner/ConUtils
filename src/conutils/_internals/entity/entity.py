@@ -1,8 +1,19 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional, TypedDict, Unpack
 
 if TYPE_CHECKING:
     from .container import Container
+
+
+class EntityArgs(TypedDict):
+    parent: Optional[Container]
+    x: int
+    y: int
+    width: int
+    height: int
+    bold: bool
+    italic: bool
+    color: Optional[tuple[int, int, int]]
 
 
 class Entity:
@@ -11,29 +22,23 @@ class Entity:
 
     Interface
         methods:
-            - 
+            -
     """
 
     # @constructor
-    def __init__(self,
-                 parent: Container | None,
-                 x: int,
-                 y: int,
-                 width: int,
-                 height: int,
-                 bold: bool,
-                 italic: bool,
-                 color: tuple[int, int, int] | None):
+    def __init__(self, **kwargs: Unpack[EntityArgs]):
+
+        parent = kwargs["parent"]
         self._parent = parent
-        self.__set_width(width)
-        self.__set_heigth(height)
-        self._x = x
-        self._y = y
-        self.bold = bold
-        self.italic = italic
+        self.__set_width(kwargs["width"])
+        self.__set_heigth(kwargs["height"])
+        self._x = kwargs["x"]
+        self._y = kwargs["y"]
+        self.bold = kwargs["bold"]
+        self.italic = kwargs["italic"]
 
         # needs checks
-        self._color = color
+        self._color = kwargs["color"]
 
         if parent:
             parent.add_child(self, replace=True)
