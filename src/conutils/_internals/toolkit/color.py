@@ -8,6 +8,10 @@ class ColorMeta(type):
     def __iter__(cls):
         return iter(cls.__colors.items())
 
+    @property
+    def colors(cls):
+        return cls.__colors.copy()
+
     @classmethod
     def add_color(cls, name: str, rgb: tuple[int, int, int], replace: bool = False):
         if name in cls.__colors and not replace:

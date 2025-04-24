@@ -2,7 +2,7 @@ from __future__ import annotations
 import asyncio
 from typing import TYPE_CHECKING
 
-from ..entity import Entity, 
+from ..entity import Entity
 
 if TYPE_CHECKING:
     from ..container import Container
@@ -11,23 +11,31 @@ if TYPE_CHECKING:
 class Element(Entity):
     """only use as abstract class, cannot handle dynamic heigth and width adjustment"""
 
-    def __init__(self, **kwargs):
+    def __init__(self,
+                 parent: Container | None,
+                 x: int,
+                 y: int,
+                 width: int,
+                 height: int,
+                 bold: bool,
+                 italic: bool,
+                 color: str | tuple[int, int, int] | None):
 
-        super().__init__(**kwargs)
+        super().__init__(parent, x, y, width, height, bold, italic, color)
 
 
 class Animated(Element):
     def __init__(self,
-                 parent: Container | None = None,
-                 x: int = 0,
-                 y: int = 0,
-                 width: int = 0,
-                 height: int = 0,
-                 frames: list[str] = [],
-                 frametime: int = 100,
-                 bold: bool = False,
-                 italic: bool = False,
-                 color: tuple[int, int, int] | None = None):
+                 parent: Container | None,
+                 x: int,
+                 y: int,
+                 width: int,
+                 height: int,
+                 bold: bool,
+                 italic: bool,
+                 color: str | tuple[int, int, int] | None,
+                 frames: list[str],
+                 frametime: int):
         """frametime in ms"""
         self._frames = frames
         self._frametime = frametime / 1000  # frametime in milliseconds

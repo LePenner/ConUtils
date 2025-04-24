@@ -10,7 +10,11 @@ if TYPE_CHECKING:
 class StaticText(Element):
     def __init__(self, representation: list[str] | None = None,
                  parent: Container | None = None,
-                 x: int = 0, y: int = 0):
+                 x: int = 0,
+                 y: int = 0,
+                 bold: bool = False,
+                 italic: bool = False,
+                 color: str | tuple[int, int, int] | None = None):
         """representation in format ["First Line","Second Line", "Third Line"]"""
         self._str = ""
 
@@ -32,7 +36,7 @@ class StaticText(Element):
             width = 1
             height = 1
 
-        super().__init__(parent, x, y, width, height)
+        super().__init__(parent, x, y, width, height, bold, italic, color)
 
     def __str__(self):
         # for right indentation on every line

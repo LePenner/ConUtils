@@ -8,7 +8,6 @@ import asyncio
 
 from .entity.container import Container
 from .entity.elements import Animated
-from .toolkit import Color
 
 
 class Console(Container):
@@ -26,8 +25,13 @@ class Console(Container):
 
     @staticmethod
     def _draw(entity: Entity):
+
+        # move cursor to position
         # terminal starts at 1,1
         print(f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
+        # set color
+        Console.set_color(entity.rgb)
+
         print(entity, end="", flush=True)
 
     @staticmethod
@@ -53,9 +57,13 @@ class Console(Container):
         print("\033[0m")
 
     @staticmethod
-    def set_color(color: str):
-        r, g, b = Color[color]
-        print(f"\033[38;2;{r};{g};{b}m")
+    def set_color(color: tuple[int, int, int] | None):
+        if color:
+            r, g, b = color
+            print(f"\033[38;2;{r};{g};{b}m", end="")
+        else:
+            print("\033[39;49m", end="")
+            pass
 
     def run(self):
         self.clear_console()

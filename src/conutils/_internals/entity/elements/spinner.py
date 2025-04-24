@@ -27,7 +27,7 @@ class Spinner(Animated):
                  frametime: int = 100,
                  bold: bool = False,
                  italic: bool = False,
-                 color: tuple[int, int, int] | None = None):
+                 color: str | tuple[int, int, int] | None = None):
 
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
@@ -36,7 +36,8 @@ class Spinner(Animated):
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
 
-        super().__init__(parent, x, y, self._div, 1, self._generate_frames(), frametime, bold, italic, color)
+        super().__init__(parent, x, y, self._div, 1,
+                         bold, italic, color, self._generate_frames(), frametime)
 
     class SpinnerDict(TypedDict):
         seq: str

@@ -1,19 +1,10 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, TypedDict, Unpack
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .container import Container
 
-
-class EntityArgs(TypedDict):
-    parent: Optional[Container]
-    x: int
-    y: int
-    width: int
-    height: int
-    bold: bool
-    italic: bool
-    color: Optional[tuple[int, int, int]]
+from ..toolkit import Color
 
 
 class Entity:
@@ -26,19 +17,29 @@ class Entity:
     """
 
     # @constructor
-    def __init__(self, **kwargs: Unpack[EntityArgs]):
+    def __init__(self,
+                 parent: Container | None,
+                 x: int,
+                 y: int,
+                 width: int,
+                 height: int,
+                 bold: bool,
+                 italic: bool,
+                 color: str | tuple[int, int, int] | None):
 
-        parent = kwargs["parent"]
         self._parent = parent
-        self.__set_width(kwargs["width"])
-        self.__set_heigth(kwargs["height"])
-        self._x = kwargs["x"]
-        self._y = kwargs["y"]
-        self.bold = kwargs["bold"]
-        self.italic = kwargs["italic"]
+
+        # define positioning
+        self.__set_width(width)
+        self.__set_heigth(height)
+        self._x = x
+        self._y = y
+
+        self.bold = bold
+        self.italic = italic
 
         # needs checks
-        self._color = kwargs["color"]
+        self.color = color
 
         if parent:
             parent.add_child(self, replace=True)
@@ -146,12 +147,45 @@ class Entity:
         return ((self.width, self.height))
 
     @property
-    def color(self):
+    def color(self) -> str | None:
         return self._color
 
     @color.setter
-    def color(self, color: tuple[int, int, int] | None):
-        pass
+    def color(self, color: str | tuple[int, int, int] | None):
+        """a color name and explicit rgb values can be passed
+
+        color effects both 
+        the properties color AND rgb"""
+
+        if type(color) == str:
+            if color not in Color.colors:
+                raise Exception(
+                    'color does not exist, add it as a color or use rgb values')
+
+            self._color = color
+            self._rgb = Color[color]
+
+        elif type(color) == tuple:
+            for i in color:
+                if 0 > i > 255:
+                    raise Exception('rgb values need to be between 0 and 255')
+
+                self._color = None
+                self._rgb = color
+
+        elif not color:
+            self._color = None
+            self._rgb = None
+
+        else:
+            raise Exception(
+                'wrong color specification, need either keyword or rgb')
+
+    @property
+    def rgb(self):
+        """for every color there is an rgb but not every rgb defines a color,
+        self._rgb = (1,2,3) and self._color = None IS POSSIBLE"""
+        return self._rgb
 
     @property
     def parent(self):
