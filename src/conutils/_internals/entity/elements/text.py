@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class StaticText(Element):
-    def __init__(self, representation: list[str] | None = None,
+    def __init__(self, representation: list[str] | str | None = None,
                  parent: Container | None = None,
                  x: int = 0,
                  y: int = 0,
@@ -21,6 +21,15 @@ class StaticText(Element):
         width = 0
 
         if representation:
+
+            # confert multi line string into prinable format
+            if type(representation) == str:
+                try:
+                    representation = [
+                        representation.strip("\n") for representation in representation.split("\n")]
+                except:
+                    raise Exception()
+
             for l in representation:
                 if not l.isprintable():
                     raise Exception()
