@@ -47,10 +47,11 @@ class Entity:
                  color: str | tuple[int, int, int] | None):
 
         self._parent = parent
+        if parent:
+            parent.add_child(self, replace=True)
+            self._parent = parent
 
         # define positioning
-        self._width = width
-        self._height = height
         self._x = x
         self._y = y
 
@@ -59,9 +60,9 @@ class Entity:
         self._set_x_abs(x)
         self._set_y_abs(y)
 
-        if parent:
-            parent.add_child(self, replace=True)
-            self._parent = parent
+        # built in conflict checks
+        self.__set_width(width)
+        self.__set_height(height)
 
         self._overlap_check()
 
@@ -70,6 +71,18 @@ class Entity:
 
         self.color = color
         self._set_display_rgb(self.rgb)
+
+    def __set_width(self, width: int) -> int | None:
+        if self._parent:
+            if self._parent.width < self.x + width:
+                raise StructureError('edge conflict')
+        self._width = width
+
+    def __set_height(self, height: int) -> int | None:
+        if self._parent:
+            if self._parent.height < self.y + height:
+                raise StructureError('edge conflict')
+        self._height = height
 
     # @protected
     def _overlap_check(self):
@@ -153,9 +166,9 @@ class Entity:
         return ((self._x, self._y))
 
     @pos.setter
-    def pos(self, x: int, y: int):
-        self.x = x
-        self.y = y
+    def pos(self, pos: tuple[int, int]):
+        self.x = pos[0]
+        self.y = pos[1]
 
     @property
     def x_abs(self) -> int:
