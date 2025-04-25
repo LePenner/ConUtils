@@ -18,10 +18,27 @@ class Container(Entity):
                  bold: bool = False,
                  italic: bool = False,
                  color: tuple[int, int, int] | None = None):
-        
+
         self._children: list[Entity] = []
         self._overlap = overlap
         super().__init__(parent, x, y, width, height, bold, italic, color)
+
+    # ----- redefine abs setters to include child logic -----
+    def _set_x_abs(self):
+        if self.parent:
+            self._x_abs = self.parent.x_abs + self.x
+            for child in self.children:
+                child._set_x_abs()
+        else:
+            return self.x
+
+    def _set_y_abs(self):
+        if self.parent:
+            self._y_abs = self.parent.y_abs + self.y
+            for child in self.children:
+                child._set_x_abs()
+        else:
+            return self.y
 
     # ----- make dimension setter public -----
 

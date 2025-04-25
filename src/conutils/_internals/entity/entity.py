@@ -35,17 +35,21 @@ class Entity:
         self._x = x
         self._y = y
 
-        self.bold = bold
-        self.italic = italic
-
-        # needs checks
-        self.color = color
+        # get absolute position recursively
+        self._x_abs = self.__get_x_abs()
+        self._y_abs = self.__get_y_abs()
 
         if parent:
             parent.add_child(self, replace=True)
             self._parent = parent
 
         self._overlap_check()
+
+        self.bold = bold
+        self.italic = italic
+
+        # needs checks
+        self.color = color
 
     def __set_width(self, width: int):
         if self.parent and hasattr(self, 'x'):
@@ -58,6 +62,18 @@ class Entity:
             if self.parent.height < self.y + height:
                 raise StructureError('edge conflict')
         self._height = height
+
+    def __get_x_abs(self):
+        if self.parent:
+            return self.parent.x_abs + self.x
+        else:
+            return self.x
+
+    def __get_y_abs(self):
+        if self.parent:
+            return self.parent.y_abs + self.y
+        else:
+            return self.y
 
     # @protected
     def _overlap_check(self):
@@ -82,6 +98,18 @@ class Entity:
                         and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
                     raise Exception('child overlap')
 
+    def _set_x_abs(self):
+        if self.parent:
+            self._x_abs = self.parent.x_abs + self.x
+        else:
+            return self.x
+
+    def _set_y_abs(self):
+        if self.parent:
+            self._y_abs = self.parent.x_abs + self.y
+        else:
+            return self.y
+
     # @public
     @property
     def x(self) -> int:
@@ -89,11 +117,12 @@ class Entity:
 
     @x.setter
     def x(self, x: int):
-        if self.parent and hasattr(self, 'width'):
-            if self.parent.width < self.width + x:
-                raise StructureError('edge conflict')
+        if self.parent and hasattr(self, 'width') and\
+                self.parent.width < self.width + x:
+            raise StructureError('edge conflict')
         self._x = x
         self._overlap_check()
+        self._set_x_abs()
 
     @property
     def y(self) -> int:
@@ -101,11 +130,12 @@ class Entity:
 
     @y.setter
     def y(self, y: int):
-        if self.parent and hasattr(self, 'height'):
-            if self.parent.height < self.height + self.y:
-                raise StructureError('edge conflict')
+        if self.parent and hasattr(self, 'height') and\
+                self.parent.height < self.height + self.y:
+            raise StructureError('edge conflict')
         self._y = y
         self._overlap_check()
+        self._set_y_abs()
 
     @property
     def pos(self) -> tuple[int, int]:
@@ -118,21 +148,15 @@ class Entity:
 
     @property
     def x_abs(self) -> int:
-        if self.parent:
-            return self.parent.x_abs + self._x
-        else:
-            return self._x
+        return self._x_abs
 
     @property
     def y_abs(self) -> int:
-        if self.parent:
-            return self.parent.y_abs + self.y
-        else:
-            return self.y
+        return self._y_abs
 
     @property
     def abs_pos(self) -> tuple[int, int]:
-        return ((self.x_abs, self.y_abs))
+        return ((self._x_abs, self._y_abs))
 
     @property
     def height(self) -> int:
