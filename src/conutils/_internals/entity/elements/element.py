@@ -35,7 +35,7 @@ class Animated(Element):
                  italic: bool,
                  color: str | tuple[int, int, int] | None,
                  frames: list[str],
-                 frametime: int):
+                 frametime: float):
         """frametime in ms"""
         self._frames = frames
         self._frametime = frametime / 1000  # frametime in milliseconds
