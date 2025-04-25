@@ -27,16 +27,19 @@ class Console(Container):
                          height=os.get_terminal_size()[1],
                          overlap=overlap)
 
+    _draw_buffer: str = ""
+
     @staticmethod
-    def _draw(entity: Entity):
+    def _add_to_buffer(entity: Entity):
 
         # move cursor to position
         # terminal starts at 1,1
-        print(f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
-        # set color
-        Console.set_color(entity.display_rgb)
+        Console._draw_buffer += f"\033[{entity.y_abs+1};{entity.x_abs+1}H"
 
-        print(entity, end="", flush=True)
+        # set color
+        Console._draw_buffer += Console.set_color(entity.display_rgb)
+
+        Console._draw_buffer += str(entity)
 
     def _cleanup(self):
         self.show_cursor()
@@ -69,9 +72,9 @@ class Console(Container):
     def set_color(color: tuple[int, int, int] | None):
         if color:
             r, g, b = color
-            print(f"\033[38;2;{r};{g};{b}m", end="")
+            return f"\033[38;2;{r};{g};{b}m"
         else:
-            print("\033[39;49m", end="")
+            return "\033[39;49m"
             pass
 
     def stop(self):
@@ -98,14 +101,16 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.sleep(0.0001)
+            await asyncio.sleep(1/10)  # one update per ms
             for child in children:
                 if isinstance(child, Animated):
                     if child.draw_flag == True:
                         child.reset_drawflag()
                         child.draw_next()
 
-                self._draw(child)
+                self._add_to_buffer(child)
+            print(Console._draw_buffer, end="", flush=True)
+            Console._draw_buffer = ""
 
             # lets user add custom functionality on runtime
             # checks for function update() in main file
