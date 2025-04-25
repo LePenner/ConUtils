@@ -24,7 +24,7 @@ class Spinner(Animated):
                  spn_type: str = 'default',
                  x: int = 0,
                  y: int = 0,
-                 frametime: int = 100,
+                 frametime: float = 100,
                  bold: bool = False,
                  italic: bool = False,
                  color: str | tuple[int, int, int] | None = None):
