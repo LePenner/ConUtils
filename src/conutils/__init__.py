@@ -5,8 +5,6 @@
 `Console` is the main screen and handles drawing `Elements`, add containers or `Elements` 
 like `Spinner` and `Text` as children, to display them.
 
-
-
 @Exposes
     classes
         - :class:`Console`
@@ -21,4 +19,17 @@ from ._internals.toolkit import Color
 from ._internals.entity.elements import Spinner, StaticText
 from ._internals.entity.container import Container
 
-__all__ = ["Container", "Spinner", "StaticText", "Console", "Color"]
+LOGO = """
+  ,ad8888ba,
+ d8"'    `"8b
+d8'
+88
+Y8,   88        88
+ Y8a. 88 .a8P   88
+  `"Y8888Y"'    88
+      88        88
+      Y8a.    .a8P
+       `"Y8888Y"'
+"""
+
+__all__ = ["Container", "Spinner", "StaticText", "Console", "Color", "LOGO"]
