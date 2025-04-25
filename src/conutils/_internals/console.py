@@ -6,7 +6,6 @@ if TYPE_CHECKING:
 import __main__
 import os
 import asyncio
-
 from .entity.container import Container
 from .entity.elements import Animated
 
@@ -14,7 +13,7 @@ from .entity.elements import Animated
 class Console(Container):
     """Console handles the output of any child screens and lines to the terminal.
 
-    you can define an `update` function to define runtime behavior 
+    define an `update` function to configure runtime behavior. 
     """
 
     def __init__(self, overlap: bool = False):
@@ -28,6 +27,9 @@ class Console(Container):
                          overlap=overlap)
 
     _draw_buffer: str = ""
+    # collects areas (range, range) where to clear artifacts after moving an Entity
+    _remove_artifacts: list[tuple[tuple[int, int],
+                                  tuple[int, int]]] = []
 
     @staticmethod
     def _add_to_buffer(entity: Entity):
@@ -52,7 +54,7 @@ class Console(Container):
 
     @staticmethod
     def show_cursor():
-        print('\033[?25h')
+        print('\033[?25h', end="")
 
     @staticmethod
     def clear_console():
@@ -66,7 +68,7 @@ class Console(Container):
 
     @staticmethod
     def reset_format():
-        print("\033[0m")
+        print("\033[0m", end="")
 
     @staticmethod
     def set_color(color: tuple[int, int, int] | None):
@@ -93,7 +95,7 @@ class Console(Container):
 
         children = self._collect_children()
 
-        # start all loops
+        # start all animation loops
         for child in children:
             if isinstance(child, Animated):
                 # _animation_loop() is protected
@@ -101,7 +103,7 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.sleep(1/10)  # one update per ms
+            await asyncio.sleep(1/100)  # one update per ms
             for child in children:
                 if isinstance(child, Animated):
                     if child.draw_flag == True:
