@@ -22,7 +22,7 @@ class StaticText(Element):
 
         if representation:
 
-            # confert multi line string into prinable format
+            # convert multi line string into printable format
             if type(representation) == str:
                 try:
                     representation = [
