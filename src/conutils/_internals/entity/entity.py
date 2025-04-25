@@ -11,9 +11,28 @@ class Entity:
     """Internal baseclass
     Defines standard for containers, text objects, etc.
 
+    Any object can be stylized with bold, itlac and color,
+    these properties get inherited by all children.
+
     Interface
-        methods:
-            -
+        **methods**:
+            - constructor
+            - 
+        **attributes**:
+            - x
+            - y
+            - pos
+            - color
+            - parent
+        read only:
+            - x_abs
+            - y_abs
+            - abs_pos
+            - height
+            - width
+            - dimension
+            - rgb
+            - display_rgb
     """
 
     # @constructor
@@ -30,14 +49,15 @@ class Entity:
         self._parent = parent
 
         # define positioning
-        self.__set_width(width)
-        self.__set_heigth(height)
+        self._width = width
+        self._height = height
         self._x = x
         self._y = y
 
-        # get absolute position recursively
-        self._x_abs = self.__get_x_abs()
-        self._y_abs = self.__get_y_abs()
+        # get initial absolute position recursively
+        # further handled in x and y setter by parent
+        self._set_x_abs(x)
+        self._set_y_abs(y)
 
         if parent:
             parent.add_child(self, replace=True)
@@ -48,67 +68,58 @@ class Entity:
         self.bold = bold
         self.italic = italic
 
-        # needs checks
         self.color = color
-
-    def __set_width(self, width: int):
-        if self.parent and hasattr(self, 'x'):
-            if self.parent.width < self.x + width:
-                raise StructureError('edge conflict')
-        self._width = width
-
-    def __set_heigth(self, height: int):
-        if self.parent and hasattr(self, 'y'):
-            if self.parent.height < self.y + height:
-                raise StructureError('edge conflict')
-        self._height = height
-
-    def __get_x_abs(self):
-        if self.parent:
-            return self.parent.x_abs + self.x
-        else:
-            return self.x
-
-    def __get_y_abs(self):
-        if self.parent:
-            return self.parent.y_abs + self.y
-        else:
-            return self.y
+        self._set_display_rgb(self.rgb)
 
     # @protected
     def _overlap_check(self):
 
         if self.parent:
             r1_x = range(
-                self.x, self.x+self._width)
+                self.x, self.x+self.width)
             r1_y = range(
-                self.y, self.y+self._height)
+                self.y, self.y+self.height)
 
             comp: list[Entity] = self.parent.children.copy()
             comp.remove(self)
 
             for child in comp:
                 r2_x = range(
-                    child.x, child.x+child._width)
+                    child.x, child.x+child.width)
                 r2_y = range(
-                    child.y, child.y+child._height)
+                    child.y, child.y+child.height)
 
                 if not self.parent.overlap\
                         and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
                         and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
                     raise Exception('child overlap')
 
-    def _set_x_abs(self):
+    def _set_x_abs(self, x: int = 0):
+
         if self.parent:
             self._x_abs = self.parent.x_abs + self.x
         else:
             return self.x
 
-    def _set_y_abs(self):
+    def _set_y_abs(self, y: int = 0):
+
         if self.parent:
-            self._y_abs = self.parent.x_abs + self.y
+            self._y_abs = self.parent.y_abs + self.y
         else:
             return self.y
+
+    def _set_display_rgb(self, rgb: tuple[int, int, int] | None = None):
+
+        # initialisation and failsafe if no parrent
+        if rgb:
+            self._display_rgb = rgb
+        else:
+            self._display_rgb = self.rgb
+
+        if self.parent and not self.rgb:
+            self._display_rgb = self.parent.display_rgb
+        else:
+            return self.rgb
 
     # @public
     @property
@@ -188,18 +199,21 @@ class Entity:
 
             self._color = color
             self._rgb = Color[color]
+            self._set_display_rgb(Color[color])
 
         elif type(color) == tuple:
             for i in color:
                 if 0 > i > 255:
                     raise Exception('rgb values need to be between 0 and 255')
 
-                self._color = None
-                self._rgb = color
+            self._color = None
+            self._rgb = color
+            self._set_display_rgb(color)
 
         elif not color:
             self._color = None
             self._rgb = None
+            self._set_display_rgb()
 
         else:
             raise Exception(
@@ -212,8 +226,25 @@ class Entity:
         return self._rgb
 
     @property
-    def parent(self):
+    def display_rgb(self) -> tuple[int, int, int] | None:
+        return self._display_rgb
+
+    @property
+    def parent(self) -> Container | None:
         return self._parent
+
+    @parent.setter
+    def parent(self, parent: Container | None):
+        if self.parent:
+            self.parent.remove_child(self)
+
+        if parent:
+            parent.add_child(self, replace=True)
+            self._parent = parent
+            self._set_x_abs()
+            self._set_y_abs()
+        else:
+            self._parent = None
 
 
 class StructureError(Exception):

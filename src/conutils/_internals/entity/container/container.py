@@ -23,8 +23,15 @@ class Container(Entity):
         self._overlap = overlap
         super().__init__(parent, x, y, width, height, bold, italic, color)
 
-    # ----- redefine abs setters to include child logic -----
-    def _set_x_abs(self):
+    # ----- redefine abs and rgb setters to include child logic -----
+    def _set_x_abs(self, x: int = 0):
+
+        # initialisation and failsafe if no parrent
+        if x:
+            self._x_abs = x
+        else:
+            self._x_abs = self.x
+
         if self.parent:
             self._x_abs = self.parent.x_abs + self.x
             for child in self.children:
@@ -32,13 +39,37 @@ class Container(Entity):
         else:
             return self.x
 
-    def _set_y_abs(self):
+    def _set_y_abs(self, y: int = 0):
+
+        # initialisation and failsafe if no parrent
+        if y:
+            self._y_abs = y
+        else:
+            self._y_abs = self.y
+
         if self.parent:
             self._y_abs = self.parent.y_abs + self.y
             for child in self.children:
                 child._set_x_abs()
         else:
             return self.y
+
+    def _set_display_rgb(self, rgb: tuple[int, int, int] | None = None):
+
+        # initialisation and failsafe if no parrent
+        if rgb:
+            self._display_rgb = rgb
+        else:
+            self._display_rgb = self.rgb
+
+        if self.parent and not self.rgb:
+            self._display_rgb = self.parent.display_rgb
+            for child in self.children:
+                child._set_display_rgb()
+        else:
+            for child in self.children:
+                child._set_display_rgb()
+            return self.rgb
 
     # ----- make dimension setter public -----
 
