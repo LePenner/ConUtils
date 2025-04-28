@@ -109,12 +109,24 @@ class Entity:
 
     def _set_x_abs(self, x: int = 0):
 
+        # initialisation and failsafe if no parrent
+        if x:
+            self._x_abs = x
+        else:
+            self._x_abs = self.x
+
         if self.parent:
             self._x_abs = self.parent.x_abs + self.x
         else:
             return self.x
 
     def _set_y_abs(self, y: int = 0):
+
+        # initialisation and failsafe if no parrent
+        if y:
+            self._y_abs = y
+        else:
+            self._y_abs = self.y
 
         if self.parent:
             self._y_abs = self.parent.y_abs + self.y
