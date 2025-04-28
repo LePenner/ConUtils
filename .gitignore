@@ -2,5 +2,5 @@ dist/
 tests/
 __pycache__/
 test.json
-.test.py
+test.py
 .vscode/
