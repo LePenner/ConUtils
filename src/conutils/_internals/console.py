@@ -36,12 +36,12 @@ class Console(Container):
 
         # move cursor to position
         # terminal starts at 1,1
-        Console._draw_buffer += f"\033[{entity.y_abs+1};{entity.x_abs+1}H"
+        print(f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
 
         # set color
-        Console._draw_buffer += Console.set_color(entity.display_rgb)
+        print(Console.get_color(entity.display_rgb), end="")
 
-        Console._draw_buffer += str(entity)
+        print(str(entity), end="")
 
     def _cleanup(self):
         self.show_cursor()
@@ -50,7 +50,7 @@ class Console(Container):
 
     @staticmethod
     def hide_cursor():
-        print('\033[?25l', end="", flush=True)
+        print('\033[?25l', end="")
 
     @staticmethod
     def show_cursor():
@@ -64,20 +64,19 @@ class Console(Container):
             case "posix":
                 os.system("clear")
             case _:
-                print("\033[2J", end="", flush=True)
+                print("\033[H\033[J", end="")
 
     @staticmethod
     def reset_format():
         print("\033[0m", end="")
 
     @staticmethod
-    def set_color(color: tuple[int, int, int] | None):
+    def get_color(color: tuple[int, int, int] | None):
         if color:
             r, g, b = color
             return f"\033[38;2;{r};{g};{b}m"
         else:
             return "\033[39;49m"
-            pass
 
     def stop(self):
         self._stop_flag = True
@@ -103,7 +102,7 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.sleep(1/100)  # one update per ms
+            await asyncio.sleep(1/1000)  # one update per ms
             for child in children:
                 if isinstance(child, Animated):
                     if child.draw_flag == True:
