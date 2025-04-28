@@ -15,8 +15,7 @@ Currently implemented:
 
 - implement multi line spinners/animations
 - add Frame class for containers
-
-- colors need to be saved on the Entity recursively to save on compute
+- create wraper for move and color funktions 
 
 ### Console
 
