@@ -1,5 +1,4 @@
 from __future__ import annotations
-from xmlrpc.client import boolean
 
 from ..entity import Entity, StructureError
 from ..elements import Element
@@ -23,37 +22,6 @@ class Container(Entity):
         self._overlap = overlap
         super().__init__(parent, x, y, width, height, bold, italic, color)
 
-    # ----- redefine abs and rgb setters to include child logic -----
-    def _set_x_abs(self, x: int = 0):
-
-        # initialisation and failsafe if no parrent
-        if x:
-            self._x_abs = x
-        else:
-            self._x_abs = self.x
-
-        if self.parent:
-            self._x_abs = self.parent.x_abs + self.x
-            for child in self.children:
-                child._set_x_abs()
-        else:
-            return self.x
-
-    def _set_y_abs(self, y: int = 0):
-
-        # initialisation and failsafe if no parrent
-        if y:
-            self._y_abs = y
-        else:
-            self._y_abs = self.y
-
-        if self.parent:
-            self._y_abs = self.parent.y_abs + self.y
-            for child in self.children:
-                child._set_x_abs()
-        else:
-            return self.y
-
     def _set_display_rgb(self, rgb: tuple[int, int, int] | None = None):
 
         # initialisation and failsafe if no parrent
@@ -65,10 +33,10 @@ class Container(Entity):
         if self.parent and not self.rgb:
             self._display_rgb = self.parent.display_rgb
             for child in self.children:
-                child._set_display_rgb()
+                child._display_rgb = child._get_display_rgb()
         else:
             for child in self.children:
-                child._set_display_rgb()
+                child._display_rgb = child._get_display_rgb()
             return self.rgb
 
     # ----- make dimension setter public -----
@@ -101,7 +69,7 @@ class Container(Entity):
         return self._children
 
     @property
-    def overlap(self) -> boolean:
+    def overlap(self) -> bool:
         return self._overlap
 
     # ----- child logic -----
