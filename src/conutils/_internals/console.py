@@ -32,7 +32,7 @@ class Console(Container):
                                   tuple[int, int]]] = []
 
     @staticmethod
-    def _add_to_buffer(entity: Entity):
+    def _draw(entity: Entity):
 
         # move cursor to position
         # terminal starts at 1,1
@@ -109,11 +109,11 @@ class Console(Container):
                         child.reset_drawflag()
                         child.draw_next()
 
-                self._add_to_buffer(child)
-            print(Console._draw_buffer, end="", flush=True)
-            Console._draw_buffer = ""
+                self._draw(child)
+
+            print(flush=True, end="")
 
             # lets user add custom functionality on runtime
             # checks for function update() in main file
-            if callable(getattr(__main__, "update", None)):
-                __main__.update()
+            # if getattr(__main__, "update", None):
+            #     __main__.update()
