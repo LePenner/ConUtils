@@ -2,21 +2,32 @@
 
 Hai :3 
 
-Terminal needs ANSI support!
+Terminal needs ANSI support! - *duh*
 
 ConUtils is a simple toolkit designed to beautify your console and provide essential utilities for script development.
 Currently implemented:
 
 - Spinner
+- StaticText
 - Containers
 - Console
 
 ## to-do:
 
+- Log 
+- DynamicTextelements
+
 - implement multi line spinners/animations
 - add Frame class for containers
-- create wraper for move and color funktions 
+- add Screen and Line Classes as containers
 
-### Console
+- add update functionality to dynamically adjust screen state after run command
 
-- add Screen and Line Classes
+### internal changes:
+
+- compile output string before printing to reduce tearing
+- move error classes to seperate folder
+
+## desgtribution
+
+- will be handled by pip ```pip install ConUtils```
