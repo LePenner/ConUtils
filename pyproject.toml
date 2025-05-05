@@ -3,8 +3,8 @@ requires = ["hatchling >= 1.26"]
 build-backend = "hatchling.build"
 
 [project]
-name = "conutils"
-version = "0.0.1"
+name = "ConUtils"
+version = "0.0.2"
 authors = [{ name = "Kira", email = "monoclecatstudio@gmail.com" }]
 description = "a collection of console output fomating methods"
 readme = "README.md"
@@ -13,6 +13,7 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Operating System :: OS Independent",
 ]
+
 license = "MIT"
 license-files = ["LICEN[CS]E*"]
 

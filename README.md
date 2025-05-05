@@ -31,3 +31,4 @@ Currently implemented:
 ## desgtribution
 
 - will be handled by pip ```pip install ConUtils```
+- currently on testpypi ```pip install --index-url https://test.pypi.org/simple/ --no-deps conutils```
