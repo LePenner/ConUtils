@@ -1,4 +1,4 @@
-# conutils/_internals/entity
+# conutils/_internals/entity/
 """Easy acess to `Entity`
 
 @Exposes

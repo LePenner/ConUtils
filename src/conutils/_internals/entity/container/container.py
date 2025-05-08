@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from ..entity import Entity, StructureError
+from ..entity import Entity
 from ..elements import Element
+from ...errors import ethrow
 
 
 class Container(Entity):
@@ -45,7 +46,7 @@ class Container(Entity):
     def width(self, width: int) -> int | None:
         if self.parent and hasattr(self, 'x'):
             if self.parent.width < self.x + width:
-                raise StructureError('edge conflict')
+                ethrow("ENTY", "edge conflict")
         self._width = width
         self._overlap_check()
 
@@ -53,7 +54,7 @@ class Container(Entity):
     def height(self, height: int) -> int | None:
         if self.parent and hasattr(self, 'y'):
             if self.parent.height < self.y + height:
-                raise StructureError('edge conflict')
+                ethrow("ENTY", "edge conflict")
         self._height = height
         self._overlap_check()
 
@@ -88,13 +89,13 @@ class Container(Entity):
     def add_child(self, child: Entity, replace: bool = False):
         self._overlap_check()
         if child._parent and not replace:
-            raise StructureError('parent double')
+            ethrow("ENTY", "parent double")
         self._children.append(child)
         child._parent = self
 
     def remove_child(self, child: Entity):
         if child not in self._children:
-            raise StructureError('child not found')
+            ethrow("ETNY", "child not found")
         self._children.remove(child)
         child._parent = None
 
@@ -102,7 +103,7 @@ class Container(Entity):
 
     def set_parent(self, parent: Container | None = None, replace: bool = False):
         if parent in self._children and not replace:
-            raise StructureError('incest')
+            ethrow("ENTY", "incest")
 
         if parent in self._children:
             self._children.remove(parent)
