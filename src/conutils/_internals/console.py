@@ -26,11 +26,6 @@ class Console(Container):
                          height=os.get_terminal_size()[1],
                          overlap=overlap)
 
-    _draw_buffer: str = ""
-    # collects areas (range, range) where to clear artifacts after moving an Entity
-    _remove_artifacts: list[tuple[tuple[int, int],
-                                  tuple[int, int]]] = []
-
     @staticmethod
     def _draw(entity: Entity):
 
