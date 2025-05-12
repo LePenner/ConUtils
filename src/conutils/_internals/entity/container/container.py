@@ -16,7 +16,7 @@ class Container(Entity):
                  overlap: bool = False,
                  bold: bool = False,
                  italic: bool = False,
-                 color: tuple[int, int, int] | None = None):
+                 color: tuple[int, int, int] | str | None = None):
 
         self._children: list[Entity] = []
         self._overlap = overlap
