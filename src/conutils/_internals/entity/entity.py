@@ -61,8 +61,8 @@ class Entity:
 
         self._abs_pos = self._get_abs_pos()
 
-        self.bold = bold
-        self.italic = italic
+        self._bold = bold
+        self._italic = italic
         self.color = color
 
     # @protected
@@ -210,6 +210,14 @@ class Entity:
     @property
     def display_rgb(self) -> tuple[int, int, int] | None:
         return self._display_rgb
+
+    @property
+    def bold(self):
+        return self._bold
+
+    @property
+    def italic(self):
+        return self._italic
 
     @property
     def parent(self) -> Container | None:
