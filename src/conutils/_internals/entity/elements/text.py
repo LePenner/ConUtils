@@ -18,6 +18,13 @@ class StaticText(Element):
         """representation in format ["First Line","Second Line", "Third Line"]"""
         self._str = ""
 
+        if type(representation) == list:
+            self._repr = representation
+        elif type(representation) == str:
+            self._repr = [representation]
+        else:
+            self._repr = []
+
         width = 0
 
         if representation:
@@ -53,3 +60,7 @@ class StaticText(Element):
             return self._str.format(x=self.x_abs, direction="C")
         else:
             return self._str.format(x=self.x_abs, direction="D")
+
+    @property
+    def representation(self):
+        return self._repr

@@ -23,6 +23,11 @@ class Element(Entity):
 
         super().__init__(parent, x, y, width, height, bold, italic, color)
 
+    @property
+    def representation(self):
+        ret: list[str] = []
+        return ret
+
 
 class Animated(Element):
     def __init__(self,
@@ -41,7 +46,7 @@ class Animated(Element):
         self._frametime = frametime / 1000  # frametime in milliseconds
         self._cur = 0
         self._draw = False
-        super().__init__(parent, x, y, width, height, bold, italic, color)
+        super().__init__(parent, x, y, width, height,  bold, italic, color)
 
     def __str__(self):
         return self._frames[self._cur]
@@ -50,6 +55,10 @@ class Animated(Element):
         while True:
             await asyncio.sleep(self._frametime)
             self._draw = True
+
+    @property
+    def representation(self):
+        return [self._frames[self._cur]]
 
     @property
     def draw_flag(self) -> bool:

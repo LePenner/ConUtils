@@ -1,0 +1,9 @@
+{
+    "ENTY": {
+        "parent double": "specified child already has parent associated, try 'replace=True'",
+        "child not found": "not a child of given container",
+        "edge conflict": "specified displacement conflicts with size of container,\nmake sure to set appropriate width and height",
+        "incest": "specified parent is already child of entity",
+        "child overlap": "positions of children conflict/overlap with each other\nto disable: overlap=True in your container"
+    }
+}

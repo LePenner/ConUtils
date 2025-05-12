@@ -30,7 +30,7 @@ exceptions are evaluated on a per case basis.
     - **note:** `properties` count as `attributes` and should be at
     the end of `classattributes`, it is best practice to follow the `property`
     declaration immediatly by its `setter`
-    - **decorated `methods`** sould be grouped at the top of `classmethods`
+    - **decorated `methods`** should be grouped at the top of `classmethods`
     sorted by occurrence
 
         ```python
@@ -125,7 +125,7 @@ exceptions are evaluated on a per case basis.
     `__init__.py` files shall include the **relative file path** as a top comment.
 
     ```python 
-    # project/magic/__init__.py
+    # project/magic/
     """Magic docstring
     
     @Exposes
@@ -139,7 +139,7 @@ exceptions are evaluated on a per case basis.
     ```
 
     ```python 
-    # src/project/magic/spells/fireball.py
+    # project/magic/spells/fireball.py
     """Magic docstring
     
     """
@@ -156,8 +156,8 @@ exceptions are evaluated on a per case basis.
 ## Usage
 
 This guide aims to clarify how to write short and precise
-documentation for packages, classes, methods, etc., to furtherunderstanding
-of the codebase by introducing minimalist principles, to inforce these values.
+documentation for packages, classes, methods, etc., to further understanding
+of the codebase.
 
 ## Principles
 

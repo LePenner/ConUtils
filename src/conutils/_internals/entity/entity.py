@@ -1,10 +1,12 @@
 from __future__ import annotations
+import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .container import Container
 
 from ..toolkit import Color
+from ..errors import ethrow
 
 
 class Entity:
@@ -54,43 +56,42 @@ class Entity:
             self._parent = parent
 
         self._pos = (x, y)
-        self.__set_dimension(width, height)
+        self._dimension = (width, height)
         self._overlap_check()
 
         self._abs_pos = self._get_abs_pos()
 
-        self.bold = bold
-        self.italic = italic
+        self._bold = bold
+        self._italic = italic
         self.color = color
-
-    def __set_dimension(self, width: int, height: int):
-        if self._parent:
-            if self._parent.width < self.x + width or self._parent.height < self.y + height:
-                raise StructureError('edge conflict')
-        self._dimension = (width, height)
 
     # @protected
     def _overlap_check(self):
 
-        if self.parent:
-            r1_x = range(
-                self.x, self.x+self.width)
-            r1_y = range(
-                self.y, self.y+self.height)
+        if not self.parent:
+            return
 
-            comp: list[Entity] = self.parent.children.copy()
-            comp.remove(self)
+        if self.parent.width < self.x + self.width or self.parent.height < self.y + self.height:
+            ethrow("ENTY", "edge conflict")
 
-            for child in comp:
-                r2_x = range(
-                    child.x, child.x+child.width)
-                r2_y = range(
-                    child.y, child.y+child.height)
+        r1_x = range(
+            self.x, self.x+self.width)
+        r1_y = range(
+            self.y, self.y+self.height)
 
-                if not self.parent.overlap\
-                        and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
-                        and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
-                    raise Exception('child overlap')
+        comp: list[Entity] = self.parent.children.copy()
+        comp.remove(self)
+
+        for child in comp:
+            r2_x = range(
+                child.x, child.x+child.width)
+            r2_y = range(
+                child.y, child.y+child.height)
+
+            if not self.parent.overlap\
+                    and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
+                    and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
+                ethrow("ENTY", "child overlap")
 
     def _get_abs_pos(self) -> tuple[int, int]:
 
@@ -116,10 +117,11 @@ class Entity:
     def pos(self, pos: tuple[int, int]):
         if self.parent:
             if self.parent.width < self.width + self.x or self.parent.height < self.height + self.y:
-                raise StructureError('edge conflict')
+                ethrow("ENTY", "edge conflict")
 
         self._pos = pos
         self._abs_pos = self._get_abs_pos()
+        time.sleep(20)
         self._overlap_check()
 
     @property
@@ -210,6 +212,14 @@ class Entity:
         return self._display_rgb
 
     @property
+    def bold(self):
+        return self._bold
+
+    @property
+    def italic(self):
+        return self._italic
+
+    @property
     def parent(self) -> Container | None:
         return self._parent
 
@@ -224,20 +234,3 @@ class Entity:
             self._abs_pos = self._get_abs_pos()
         else:
             self._parent = None
-
-
-class StructureError(Exception):
-    def __init__(self, key: str):
-        messages = {'parent double': "specified child already has parent associated, try 'replace=True'",
-                    'child not found': "not a child of given container",
-                    'edge conflict': "specified displacement conflicts with size of container,\nmake sure to set appropriate width and height",
-                    'incest': "specified parent is already child of entity",
-                    'child overlap': "positions of children conflict/overlap with each other\nto disable: overlap=True in your container"
-                    }
-
-        if key in messages:
-            message = messages[key]
-        else:
-            message = 'unknown error'
-
-        super().__init__(f'invalid structure\n  ' + message)
