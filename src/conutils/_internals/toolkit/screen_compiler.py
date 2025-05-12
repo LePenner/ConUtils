@@ -1,8 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from conutils._internals.console import Console
-
 if TYPE_CHECKING:
     from ..entity.elements import Element
     from ..console import Console
@@ -16,8 +14,8 @@ class Output:
 
     def __init__(self, console: Console):
 
-        #             screen>line>obj(pos, rep, bold, italic, rgb(r,g,b)|None)
-        self.screen: screen_type = [[] for _ in range(console.height)]
+        self.console = console
+        self.clear()
 
     # keep track of ansi esc seq length
 
@@ -30,8 +28,8 @@ class Output:
         for i, rep in enumerate(element.representation):
 
             line = element.y_abs+i
-            index = self.binsert_algo(element.x_abs, self.screen[line])
-            self.screen[line].insert(
+            index = self.binsert_algo(element.x_abs, self._screen[line])
+            self._screen[line].insert(
                 index, (element.x_abs, rep, element.bold, element.italic, element.display_rgb))
 
     @staticmethod
@@ -40,15 +38,34 @@ class Output:
 
         piv = len(lst)//2
 
-        if len(lst) > 1:
+        if len(lst) > 0:
 
+            # for normal usecases no overlap in representation positions
+            # >>> no x == lst[piv][0]
             if x > lst[piv][0]:
-                return piv+Output.binsert_algo(x, lst[piv+1:])
-            elif x == lst[piv][0]:
-                raise 
+                return piv+Output.binsert_algo(x, lst[piv+1:])+1
             else:
                 return Output.binsert_algo(x, lst[:piv])
-        elif len(lst) == 1:
-            return 1
         else:
             return 0
+
+    def clear(self):
+        #             screen>line>obj(pos, rep, bold, italic, rgb(r,g,b)|None)
+        self._screen: screen_type = [[] for _ in range(self.console.height)]
+
+    def compile(self):
+        out = ""
+        for i, line in enumerate(self._screen):
+            for j, obj in enumerate(line):
+                if j > 0:
+                    # addspacing
+                    out += " "*((obj[0] - len(line[j-1][1]) - line[j-1][0]))
+                # add representation
+                out += obj[1]
+
+            if len(self._screen) != i+1:
+                out += "\n"
+            else:
+                out += "\033[u"
+
+        return out

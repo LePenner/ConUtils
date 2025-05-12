@@ -8,6 +8,7 @@ import os
 import asyncio
 from .entity.container import Container
 from .entity.elements import Animated
+from .toolkit.screen_compiler import Output
 
 
 class Console(Container):
@@ -26,8 +27,9 @@ class Console(Container):
                          height=os.get_terminal_size()[1],
                          overlap=overlap)
 
-    @staticmethod
-    def _draw(entity: Entity):
+        self._otp = Output(self)
+
+    def _draw(self, entity: Entity):
 
         # move cursor to position
         # terminal starts at 1,1
@@ -104,9 +106,11 @@ class Console(Container):
                         child.reset_drawflag()
                         child.draw_next()
 
-                self._draw(child)
+                self._otp.add(child)
 
-            print(flush=True, end="")
+            print(self._otp.compile(), end="\r")
+
+            self._otp.clear()
 
             # lets user add custom functionality on runtime
             # checks for function update() in main file
