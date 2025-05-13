@@ -1,8 +1,3 @@
-from __future__ import annotations
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from .entity import Entity
-
 import __main__
 import os
 import asyncio
@@ -28,17 +23,6 @@ class Console(Container):
                          overlap=overlap)
 
         self._otp = Output(self)
-
-    def _draw(self, entity: Entity):
-
-        # move cursor to position
-        # terminal starts at 1,1
-        print(f"\033[{entity.y_abs+1};{entity.x_abs+1}H", end="")
-
-        # set color
-        print(Console.get_color(entity.display_rgb), end="")
-
-        print(str(entity), end="")
 
     def _cleanup(self):
         self.show_cursor()
@@ -66,14 +50,6 @@ class Console(Container):
     @staticmethod
     def reset_format():
         print("\033[0m", end="")
-
-    @staticmethod
-    def get_color(color: tuple[int, int, int] | None):
-        if color:
-            r, g, b = color
-            return f"\033[38;2;{r};{g};{b}m"
-        else:
-            return "\033[39;49m"
 
     def stop(self):
         self._stop_flag = True
