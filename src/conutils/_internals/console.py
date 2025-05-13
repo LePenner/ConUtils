@@ -1,7 +1,6 @@
 import __main__
 import os
 import asyncio
-import time
 from .entity.container import Container
 from .entity.elements import Animated
 from .toolkit.screen_compiler import Output
