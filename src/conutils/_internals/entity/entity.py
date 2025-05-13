@@ -1,5 +1,4 @@
 from __future__ import annotations
-import time
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -121,7 +120,6 @@ class Entity:
 
         self._pos = pos
         self._abs_pos = self._get_abs_pos()
-        time.sleep(20)
         self._overlap_check()
 
     @property

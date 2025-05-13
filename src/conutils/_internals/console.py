@@ -1,6 +1,7 @@
 import __main__
 import os
 import asyncio
+import time
 from .entity.container import Container
 from .entity.elements import Animated
 from .toolkit.screen_compiler import Output
@@ -57,6 +58,7 @@ class Console(Container):
     def run(self):
         self.clear_console()
         self.hide_cursor()
+        print("\033[s", end="")
         try:
             asyncio.run(self._run_async())
             self._cleanup()
@@ -85,10 +87,9 @@ class Console(Container):
                 self._otp.add(child)
 
             print(self._otp.compile(), end="\r")
-
             self._otp.clear()
 
             # lets user add custom functionality on runtime
             # checks for function update() in main file
-            # if getattr(__main__, "update", None):
-            #     __main__.update()
+            if getattr(__main__, "update", None):
+                __main__.update()

@@ -18,6 +18,14 @@ class StaticText(Element):
         """representation in format ["First Line","Second Line", "Third Line"]"""
         self._str = ""
 
+        # convert multi line string into printable format
+        if type(representation) == str:
+            try:
+                representation = [
+                    representation.strip("\n") for representation in representation.split("\n")]
+            except:
+                raise Exception()
+
         if type(representation) == list:
             self._repr = representation
         elif type(representation) == str:
@@ -28,14 +36,6 @@ class StaticText(Element):
         width = 0
 
         if representation:
-
-            # convert multi line string into printable format
-            if type(representation) == str:
-                try:
-                    representation = [
-                        representation.strip("\n") for representation in representation.split("\n")]
-                except:
-                    raise Exception()
 
             for l in representation:
                 if not l.isprintable():

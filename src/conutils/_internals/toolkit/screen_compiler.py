@@ -62,24 +62,37 @@ class Output:
     def compile(self):
         out = ""
         for i, line in enumerate(self._screen):
+
+            # fill line with spaces if empty
+            if len(line) == 0:
+                out += " "*self.console.width
+
             for j, obj in enumerate(line):
                 if j > 0:
-                    # addspacing
-                    # starting position - starting position - len
+                    # add spacing
+                    # starting position - starting position - len(obj)
                     out += " "*(obj[0] - line[j-1][0] - len(line[j-1][1]))
                 else:
                     out += " "*obj[0]
 
-                # add representation
+                # check for color
                 if obj[4]:
                     out += Output.get_color(obj[4])
                 else:
-                    out += "\033[0m"
+                    out += "\033[39m"
 
+                # add representation
                 out += obj[1]
 
+                # if last object in line:
+                if len(line) == j+1:
+                    # fill rest of line with spaces
+                    out += " "*(self.console.width - obj[0] - len(obj[1]))
+
+            # add new line at end of line
             if len(self._screen) != i+1:
                 out += "\n"
+            # if last line: return to top left
             else:
                 out += "\033[u"
 
