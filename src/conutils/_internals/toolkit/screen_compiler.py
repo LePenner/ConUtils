@@ -42,9 +42,16 @@ class Output:
         else:
             return 0
 
+    t = 0
+
     def clear(self):
         #             screen>line>obj(pos, rep, bold, italic, rgb(r,g,b)|None)
         self._screen: screen_type = [[] for _ in range(self.console.height)]
+
+        if self.t == 0:
+            self.t = 1
+        else:
+            self.t = 0
 
     def add(self, element: Element):
         """Add an Element to a line in screen.
@@ -64,10 +71,12 @@ class Output:
         for i, line in enumerate(self._screen):
 
             # fill line with spaces if empty
+
             if len(line) == 0:
                 out += " "*self.console.width
 
             for j, obj in enumerate(line):
+
                 if j > 0:
                     # add spacing
                     # starting position - starting position - len(obj)

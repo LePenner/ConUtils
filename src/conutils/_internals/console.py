@@ -12,8 +12,9 @@ class Console(Container):
     define an `update` function to configure runtime behavior. 
     """
 
-    def __init__(self, overlap: bool = False):
+    def __init__(self, overlap: bool = False, fps: int = 100):
         self._stop_flag = False
+        self.fps = fps
 
         super().__init__(parent=None,
                          x=0,
@@ -76,7 +77,7 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.sleep(1/1000)  # one update per ms
+            await asyncio.sleep(1/self.fps)
             for child in children:
                 if isinstance(child, Animated):
                     if child.draw_flag == True:
