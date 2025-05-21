@@ -29,6 +29,8 @@ class Spinner(Animated):
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
 
+        kwargs["width"] = self._div
+
         super().__init__(self._generate_frames(), frametime, **kwargs)
 
     class SpinnerDict(TypedDict):

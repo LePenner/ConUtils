@@ -28,6 +28,7 @@ class Animated(Element):
         self._frametime = frametime / 1000  # frametime in milliseconds
         self._cur = 0
         self._draw = False
+
         super().__init__(**kwargs)
 
     def __str__(self):

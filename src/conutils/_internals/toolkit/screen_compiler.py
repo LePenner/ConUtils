@@ -5,6 +5,7 @@ if TYPE_CHECKING:
     from ..entity.elements import Element
     from ..console import Console
 
+#             screen>line>obj(pos, rep, bold, italic, rgb(r,g,b)|None)
 obj_type = tuple[int, str, bool, bool, tuple[int, int, int] | None]
 line_type = list[obj_type]
 screen_type = list[line_type]
@@ -45,7 +46,6 @@ class Output:
     t = 0
 
     def clear(self):
-        #             screen>line>obj(pos, rep, bold, italic, rgb(r,g,b)|None)
         self._screen: screen_type = [[] for _ in range(self.console.height)]
 
         if self.t == 0:
