@@ -1,11 +1,22 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, Unpack
 
 if TYPE_CHECKING:
     from .container import Container
 
 from ..toolkit import Color
 from ..errors import ethrow
+
+
+class EntityKwargs(TypedDict, total=False):
+    parent: Container | None
+    x: int
+    y: int
+    width: int
+    height: int
+    bold: bool
+    italic: bool
+    color: tuple[int, int, int] | str | None
 
 
 class Entity:
@@ -39,15 +50,16 @@ class Entity:
     """
 
     # @constructor
-    def __init__(self,
-                 parent: Container | None,
-                 x: int,
-                 y: int,
-                 width: int,
-                 height: int,
-                 bold: bool,
-                 italic: bool,
-                 color: str | tuple[int, int, int] | None):
+    def __init__(self, **kwargs: Unpack[EntityKwargs]):
+
+        parent = kwargs.get("parent", None)
+        x = kwargs.get("x", 0)
+        y = kwargs.get("y", 0)
+        width = kwargs.get("width", 1)
+        height = kwargs.get("height", 1)
+        bold = kwargs.get("bold", False)
+        italic = kwargs.get("italic", False)
+        color = kwargs.get("color", None)
 
         self._parent = parent
         if parent:

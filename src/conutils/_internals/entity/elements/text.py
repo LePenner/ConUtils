@@ -1,20 +1,12 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Unpack
 
+from ..entity import EntityKwargs
 from .element import Element
-
-if TYPE_CHECKING:
-    from ..container import Container
 
 
 class StaticText(Element):
-    def __init__(self, representation: list[str] | str | None = None,
-                 parent: Container | None = None,
-                 x: int = 0,
-                 y: int = 0,
-                 bold: bool = False,
-                 italic: bool = False,
-                 color: str | tuple[int, int, int] | None = None):
+    def __init__(self, representation: list[str] | str | None = None, **kwargs: Unpack[EntityKwargs]):
         """representation in format ["First Line","Second Line", "Third Line"]"""
         self._str = ""
 
@@ -33,7 +25,7 @@ class StaticText(Element):
         else:
             self._repr = []
 
-        width = 0
+        kwargs["width"] = 0
 
         if representation:
 
@@ -45,14 +37,14 @@ class StaticText(Element):
                 else:
                     self._str += '\n\033[{x}{direction}'+l
 
-                if len(l) > width:
-                    width = len(l)
-            height = len(representation)
+                if len(l) > kwargs["width"]:
+                    kwargs["width"] = len(l)
+            kwargs["height"] = len(representation)
         else:
-            width = 1
-            height = 1
+            kwargs["width"] = 1
+            kwargs["height"] = 1
 
-        super().__init__(parent, x, y, width, height, bold, italic, color)
+        super().__init__(**kwargs)
 
     def __str__(self):
         # for right indentation on every line

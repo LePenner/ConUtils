@@ -1,11 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TypedDict, Unpack
 import json
 
 from .element import Animated
-
-if TYPE_CHECKING:
-    from ..container import Container
+from ..entity import EntityKwargs
 
 
 class Spinner(Animated):
@@ -20,14 +18,9 @@ class Spinner(Animated):
     """
 
     def __init__(self,
-                 parent: Container | None = None,
                  spn_type: str = 'default',
-                 x: int = 0,
-                 y: int = 0,
                  frametime: float = 100,
-                 bold: bool = False,
-                 italic: bool = False,
-                 color: str | tuple[int, int, int] | None = None):
+                 **kwargs: Unpack[EntityKwargs]):
 
         if spn_type not in Spinner._spinners:
             raise SpinnerTypeError('msng_type', spn_type)
@@ -36,8 +29,7 @@ class Spinner(Animated):
         self._seq = Spinner._spinners[spn_type]["seq"]
         self._div = Spinner._spinners[spn_type]["div"]
 
-        super().__init__(parent, x, y, self._div, 1,
-                         bold, italic, color, self._generate_frames(), frametime)
+        super().__init__(self._generate_frames(), frametime, **kwargs)
 
     class SpinnerDict(TypedDict):
         seq: str

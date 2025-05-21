@@ -3,10 +3,11 @@
 
 @Exposes
     baseclasses
-        - :class:`Entity`
+        - :class:`Entity` 
+    typeddicts
+        - :class:`EntityKwargs`
 """
 
-from .entity import Entity
+from .entity import Entity, EntityKwargs
 
-
-__all__ = ["Entity"]
+__all__ = ["Entity", "EntityKwargs"]

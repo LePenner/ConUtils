@@ -1,9 +1,11 @@
 import __main__
 import os
 import asyncio
+from typing import Unpack
 from .entity.container import Container
 from .entity.elements import Animated
 from .toolkit.screen_compiler import Output
+from .entity.entity import EntityKwargs
 
 
 class Console(Container):
@@ -12,16 +14,17 @@ class Console(Container):
     define an `update` function to configure runtime behavior. 
     """
 
-    def __init__(self, overlap: bool = False, fps: int = 100):
+    def __init__(self, overlap: bool = False, fps: int = 100, **kwargs: Unpack[EntityKwargs]):
         self._stop_flag = False
         self.fps = fps
 
-        super().__init__(parent=None,
-                         x=0,
-                         y=0,
-                         width=os.get_terminal_size()[0],
-                         height=os.get_terminal_size()[1],
-                         overlap=overlap)
+        kwargs["parent"] = None
+        kwargs["x"] = 0
+        kwargs["y"] = 0
+        kwargs["width"] = os.get_terminal_size()[0]
+        kwargs["height"] = os.get_terminal_size()[1]
+
+        super().__init__(overlap=overlap, **kwargs)
 
         self._otp = Output(self)
 
