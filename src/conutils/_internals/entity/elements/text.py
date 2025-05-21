@@ -6,7 +6,9 @@ from .element import Element
 
 
 class StaticText(Element):
-    def __init__(self, representation: list[str] | str | None = None, **kwargs: Unpack[EntityKwargs]):
+    def __init__(self,
+                 representation: list[str] | str | None = None,
+                 **kwargs: Unpack[EntityKwargs]):
         """representation in format ["First Line","Second Line", "Third Line"]"""
         self._str = ""
 
@@ -56,3 +58,9 @@ class StaticText(Element):
     @property
     def representation(self):
         return self._repr
+
+
+class Text(Element):
+    def __init__(self,
+                 **kwargs: Unpack[EntityKwargs]):
+        super().__init__(**kwargs)

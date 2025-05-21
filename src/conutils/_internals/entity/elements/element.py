@@ -25,6 +25,7 @@ class Animated(Element):
                  **kwargs: Unpack[EntityKwargs]):
         """frametime in ms"""
         self._frames = frames
+        # NOT PRECISE FOR LOW VALUES
         self._frametime = frametime / 1000  # frametime in milliseconds
         self._cur = 0
         self._draw = False

@@ -3,7 +3,7 @@
 """ConUtils API.
 
 `Console`, `Screen` and `Line` are all `Containers` to structure your console output.
-`Console` is the main screen and handles drawing `Elements`, add containers or `Elements` 
+`Console` is the main screen and handles drawing `Elements`, add containers or `Elements`
 like `Spinner` and `StaticText` as children, to display them.
 
 @Exposes
@@ -17,7 +17,7 @@ like `Spinner` and `StaticText` as children, to display them.
 # pulls API components diretly
 from ._internals import Console
 from ._internals.toolkit import Color
-from ._internals.entity.elements import Spinner, StaticText
+from ._internals.entity.elements import Spinner, StaticText, Log
 from ._internals.entity.container import Container
 
 LOGO = """
@@ -33,4 +33,5 @@ Y8,   88        88
        `"Y8888Y"'
 """
 
-__all__ = ["Container", "Spinner", "StaticText", "Console", "Color", "LOGO"]
+__all__ = ["Container", "Spinner", "StaticText",
+           "Log", "Console", "Color", "LOGO"]
