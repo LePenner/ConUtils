@@ -13,6 +13,7 @@ class Log(Element):
                  layout: str = "[{timestamp}][{status}] {msg}",
                  status: str = "running",
                  msg: str = "",
+                 max_width: int = 0,
                  ** kwargs: Unpack[EntityKwargs]
                  ):
         """Log also creates a log file.
@@ -29,10 +30,24 @@ class Log(Element):
 
         self._display_time = display_time
         self._layout = layout
+        self.max_width = max_width
         self.log(msg)
-        kwargs["width"] = len(self.representation[0])
+        if max_width:
+            kwargs["width"] = max_width
+        else:
+            kwargs["width"] = len(self.__initial_repr()[0])
 
         super().__init__(**kwargs)
+
+    def __initial_repr(self):
+        values = {
+            key: val() if callable(val) else val
+            for key, val in self._values.items()
+        }
+
+        otp = self._layout.format(**values)
+        self._dimension = (len(otp), 1)
+        return [otp]
 
     @property
     def representation(self):
@@ -43,7 +58,14 @@ class Log(Element):
         }
 
         otp = self._layout.format(**values)
+
+        if self.max_width:
+            if len(otp) > self.max_width:
+                return [otp[:self.max_width-3:]+"..."]
+            return [otp]
+
         self._dimension = (len(otp), 1)
+        self._overlap_check()
         return [otp]
 
     def add_value(self, key: str, val: str | Callable[[], str], replace: bool = False):
