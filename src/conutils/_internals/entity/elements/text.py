@@ -5,62 +5,48 @@ from ..entity import EntityKwargs
 from .element import Element
 
 
-class StaticText(Element):
+class Text(Element):
     def __init__(self,
                  representation: list[str] | str | None = None,
                  **kwargs: Unpack[EntityKwargs]):
-        """representation in format ["First Line","Second Line", "Third Line"]"""
+        """Representation in format ["First Line","Second Line", "Third Line"] or as string with '\\n'.
+        """
+
         self._str = ""
-
-        # convert multi line string into printable format
-        if type(representation) == str:
-            try:
-                representation = [
-                    representation.strip("\n") for representation in representation.split("\n")]
-            except:
-                raise Exception()
-
-        if type(representation) == list:
-            self._repr = representation
-        elif type(representation) == str:
-            self._repr = [representation]
-        else:
-            self._repr = []
-
-        kwargs["width"] = 0
-
-        if representation:
-
-            for l in representation:
-                if not l.isprintable():
-                    raise Exception()
-                if self._str == "":
-                    self._str = l
-                else:
-                    self._str += '\n\033[{x}{direction}'+l
-
-                if len(l) > kwargs["width"]:
-                    kwargs["width"] = len(l)
-            kwargs["height"] = len(representation)
-        else:
-            kwargs["width"] = 1
-            kwargs["height"] = 1
+        self.representation = representation
 
         super().__init__(**kwargs)
-
-    def __str__(self):
-        # for right indentation on every line
-        if self.x_abs > 0:
-            return self._str.format(x=self.x_abs, direction="C")
-        else:
-            return self._str.format(x=self.x_abs, direction="D")
 
     @property
     def representation(self):
         return self._repr
 
+    @representation.setter
+    def representation(self, representation: str | list[str] | None):
 
-class Text(Element):
-    def __init__(self,
-                 **kwargs: Unpack[EntityKwargs]):
-        super().__init__(**kwargs)
+        # convert multi line string into printable format
+        if isinstance(representation, str):
+            try:
+                self._repr = [
+                    representation.strip("\n") for representation in representation.split("\n")]
+            except:
+                raise Exception("Falty String")
+        elif representation != None:
+            self._repr = representation
+        else:
+            self._repr = []
+
+        if representation:
+            width = 0
+            for line in self._repr:
+                if not line.isprintable():
+                    raise Exception("Faulty String")
+
+                if len(line) > width:
+                    width = len(line)
+            height = len(self._repr)
+        else:
+            width = 1
+            height = 1
+
+        self._dimension = (width, height)

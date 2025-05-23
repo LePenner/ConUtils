@@ -11,11 +11,11 @@
 """
 
 # classes
-from .text import StaticText
+from .text import Text
 from .spinner import Spinner
 from .log import Log
 
 # baseclasses
 from .element import Element, Animated
 
-__all__ = ["StaticText", "Spinner", "Element", "Animated", "Log"]
+__all__ = ["Text", "Spinner", "Element", "Animated", "Log"]
