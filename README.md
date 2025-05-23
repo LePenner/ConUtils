@@ -8,7 +8,7 @@ ConUtils is a simple toolkit designed to beautify your console and provide essen
 Currently implemented:
 
 - Spinner
-- StaticText
+- Text
 - Containers
 - Console
 
