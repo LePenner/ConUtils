@@ -1,27 +1,37 @@
 from __future__ import annotations
-from xmlrpc.client import boolean
+from typing import Unpack
 
-from ..entity import Entity, StructureError
+from ..entity import Entity, EntityKwargs
 from ..elements import Element
+from ...errors import ethrow
 
 
 class Container(Entity):
     """simple container class with child/parent logic"""
 
     def __init__(self,
-                 parent: Container | None = None,
-                 x: int = 0,
-                 y: int = 0,
-                 width: int = 1,
-                 height: int = 1,
-                 overlap: bool = False,
-                 bold: bool = False,
-                 italic: bool = False,
-                 color: tuple[int, int, int] | None = None):
-        
+                 overlap: bool = False, **kwargs: Unpack[EntityKwargs]):
+
         self._children: list[Entity] = []
         self._overlap = overlap
-        super().__init__(parent, x, y, width, height, bold, italic, color)
+        super().__init__(**kwargs)
+
+    def _set_display_rgb(self, rgb: tuple[int, int, int] | None = None):
+
+        # initialisation and failsafe if no parrent
+        if rgb:
+            self._display_rgb = rgb
+        else:
+            self._display_rgb = self.rgb
+
+        if self.parent and not self.rgb:
+            self._display_rgb = self.parent.display_rgb
+            for child in self.children:
+                child._display_rgb = child._get_display_rgb()
+        else:
+            for child in self.children:
+                child._display_rgb = child._get_display_rgb()
+            return self.rgb
 
     # ----- make dimension setter public -----
 
@@ -29,7 +39,7 @@ class Container(Entity):
     def width(self, width: int) -> int | None:
         if self.parent and hasattr(self, 'x'):
             if self.parent.width < self.x + width:
-                raise StructureError('edge conflict')
+                ethrow("ENTY", "edge conflict")
         self._width = width
         self._overlap_check()
 
@@ -37,7 +47,7 @@ class Container(Entity):
     def height(self, height: int) -> int | None:
         if self.parent and hasattr(self, 'y'):
             if self.parent.height < self.y + height:
-                raise StructureError('edge conflict')
+                ethrow("ENTY", "edge conflict")
         self._height = height
         self._overlap_check()
 
@@ -53,7 +63,7 @@ class Container(Entity):
         return self._children
 
     @property
-    def overlap(self) -> boolean:
+    def overlap(self) -> bool:
         return self._overlap
 
     # ----- child logic -----
@@ -72,13 +82,13 @@ class Container(Entity):
     def add_child(self, child: Entity, replace: bool = False):
         self._overlap_check()
         if child._parent and not replace:
-            raise StructureError('parent double')
+            ethrow("ENTY", "parent double")
         self._children.append(child)
         child._parent = self
 
     def remove_child(self, child: Entity):
         if child not in self._children:
-            raise StructureError('child not found')
+            ethrow("ETNY", "child not found")
         self._children.remove(child)
         child._parent = None
 
@@ -86,7 +96,7 @@ class Container(Entity):
 
     def set_parent(self, parent: Container | None = None, replace: bool = False):
         if parent in self._children and not replace:
-            raise StructureError('incest')
+            ethrow("ENTY", "incest")
 
         if parent in self._children:
             self._children.remove(parent)

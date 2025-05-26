@@ -1,150 +1,178 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, Unpack
 
 if TYPE_CHECKING:
     from .container import Container
 
 from ..toolkit import Color
+from ..errors import ethrow
+
+
+class EntityKwargs(TypedDict, total=False):
+    parent: Container | None
+    x: int
+    y: int
+    width: int
+    height: int
+    bold: bool
+    italic: bool
+    color: tuple[int, int, int] | str | None
 
 
 class Entity:
     """Internal baseclass
     Defines standard for containers, text objects, etc.
 
+    Any object can be stylized with bold, italic and color,
+    these properties get inherited by all children.
+
+    Positional data is handled through pos property, 
+    which includes all needed checks.
+
     Interface
-        methods:
-            -
+        **methods**:
+            - constructor
+        **attributes**:
+            - x
+            - y
+            - pos
+            - color
+            - parent
+        read only:
+            - x_abs
+            - y_abs
+            - abs_pos
+            - height
+            - width
+            - dimension
+            - rgb
+            - display_rgb
     """
 
     # @constructor
-    def __init__(self,
-                 parent: Container | None,
-                 x: int,
-                 y: int,
-                 width: int,
-                 height: int,
-                 bold: bool,
-                 italic: bool,
-                 color: str | tuple[int, int, int] | None):
+    def __init__(self, **kwargs: Unpack[EntityKwargs]):
+
+        parent = kwargs.get("parent", None)
+        x = kwargs.get("x", 0)
+        y = kwargs.get("y", 0)
+        width = kwargs.get("width", 1)
+        height = kwargs.get("height", 1)
+        bold = kwargs.get("bold", False)
+        italic = kwargs.get("italic", False)
+        color = kwargs.get("color", None)
 
         self._parent = parent
-
-        # define positioning
-        self.__set_width(width)
-        self.__set_heigth(height)
-        self._x = x
-        self._y = y
-
-        self.bold = bold
-        self.italic = italic
-
-        # needs checks
-        self.color = color
-
         if parent:
             parent.add_child(self, replace=True)
             self._parent = parent
 
+        self._pos = (x, y)
+        self._dimension = (width, height)
         self._overlap_check()
 
-    def __set_width(self, width: int):
-        if self.parent and hasattr(self, 'x'):
-            if self.parent.width < self.x + width:
-                raise StructureError('edge conflict')
-        self._width = width
+        self._abs_pos = self._get_abs_pos()
 
-    def __set_heigth(self, height: int):
-        if self.parent and hasattr(self, 'y'):
-            if self.parent.height < self.y + height:
-                raise StructureError('edge conflict')
-        self._height = height
+        self._bold = bold
+        self._italic = italic
+        self.color = color
 
     # @protected
     def _overlap_check(self):
 
+        if not self.parent:
+            return
+
+        if self.parent.width < self.x + self.width or self.parent.height < self.y + self.height:
+            ethrow("ENTY", "edge conflict")
+
+        r1_x = range(
+            self.x, self.x+self.width)
+        r1_y = range(
+            self.y, self.y+self.height)
+
+        comp: list[Entity] = self.parent.children.copy()
+        comp.remove(self)
+
+        for child in comp:
+            r2_x = range(
+                child.x, child.x+child.width)
+            r2_y = range(
+                child.y, child.y+child.height)
+
+            if not self.parent.overlap\
+                    and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
+                    and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
+                ethrow("ENTY", "child overlap")
+
+    def _get_abs_pos(self) -> tuple[int, int]:
+
         if self.parent:
-            r1_x = range(
-                self.x, self.x+self._width)
-            r1_y = range(
-                self.y, self.y+self._height)
+            return (self.parent.x_abs +
+                    self.x, self.parent.y_abs+self.y)
+        else:
+            return self.pos
 
-            comp: list[Entity] = self.parent.children.copy()
-            comp.remove(self)
+    def _get_display_rgb(self):
 
-            for child in comp:
-                r2_x = range(
-                    child.x, child.x+child._width)
-                r2_y = range(
-                    child.y, child.y+child._height)
-
-                if not self.parent.overlap\
-                        and r1_x.start < r2_x.stop and r2_x.start < r1_x.stop\
-                        and r1_y.start < r2_y.stop and r2_y.start < r1_y.stop:
-                    raise Exception('child overlap')
+        if self.parent and not self.rgb:
+            return self.parent.display_rgb
+        else:
+            return self.rgb
 
     # @public
     @property
+    def pos(self) -> tuple[int, int]:
+        return self._pos
+
+    @pos.setter
+    def pos(self, pos: tuple[int, int]):
+        if self.parent:
+            if self.parent.width < self.width + self.x or self.parent.height < self.height + self.y:
+                ethrow("ENTY", "edge conflict")
+
+        self._pos = pos
+        self._abs_pos = self._get_abs_pos()
+        self._overlap_check()
+
+    @property
     def x(self) -> int:
-        return self._x
+        return self._pos[0]
 
     @x.setter
     def x(self, x: int):
-        if self.parent and hasattr(self, 'width'):
-            if self.parent.width < self.width + x:
-                raise StructureError('edge conflict')
-        self._x = x
-        self._overlap_check()
+        self.pos = (x, self.y)
 
     @property
     def y(self) -> int:
-        return self._y
+        return self._pos[1]
 
     @y.setter
     def y(self, y: int):
-        if self.parent and hasattr(self, 'height'):
-            if self.parent.height < self.height + self.y:
-                raise StructureError('edge conflict')
-        self._y = y
-        self._overlap_check()
-
-    @property
-    def pos(self) -> tuple[int, int]:
-        return ((self._x, self._y))
-
-    @pos.setter
-    def pos(self, x: int, y: int):
-        self.x = x
-        self.y = y
+        self.pos = (self.x, y)
 
     @property
     def x_abs(self) -> int:
-        if self.parent:
-            return self.parent.x_abs + self._x
-        else:
-            return self._x
+        return self._abs_pos[0]
 
     @property
     def y_abs(self) -> int:
-        if self.parent:
-            return self.parent.y_abs + self.y
-        else:
-            return self.y
+        return self._abs_pos[1]
 
     @property
     def abs_pos(self) -> tuple[int, int]:
-        return ((self.x_abs, self.y_abs))
-
-    @property
-    def height(self) -> int:
-        return self._height
+        return self._abs_pos
 
     @property
     def width(self) -> int:
-        return self._width
+        return self._dimension[0]
+
+    @property
+    def height(self) -> int:
+        return self._dimension[1]
 
     @property
     def dimensions(self):
-        return ((self.width, self.height))
+        return self._dimension
 
     @property
     def color(self) -> str | None:
@@ -170,8 +198,8 @@ class Entity:
                 if 0 > i > 255:
                     raise Exception('rgb values need to be between 0 and 255')
 
-                self._color = None
-                self._rgb = color
+            self._color = None
+            self._rgb = color
 
         elif not color:
             self._color = None
@@ -181,6 +209,8 @@ class Entity:
             raise Exception(
                 'wrong color specification, need either keyword or rgb')
 
+        self._display_rgb = self._get_display_rgb()
+
     @property
     def rgb(self):
         """for every color there is an rgb but not every rgb defines a color,
@@ -188,22 +218,29 @@ class Entity:
         return self._rgb
 
     @property
-    def parent(self):
+    def display_rgb(self) -> tuple[int, int, int] | None:
+        return self._display_rgb
+
+    @property
+    def bold(self):
+        return self._bold
+
+    @property
+    def italic(self):
+        return self._italic
+
+    @property
+    def parent(self) -> Container | None:
         return self._parent
 
+    @parent.setter
+    def parent(self, parent: Container | None):
+        if self.parent:
+            self.parent.remove_child(self)
 
-class StructureError(Exception):
-    def __init__(self, key: str):
-        messages = {'parent double': "specified child already has parent associated, try 'replace=True'",
-                    'child not found': "not a child of given container",
-                    'edge conflict': "specified displacement conflicts with size of container,\nmake sure to set appropriate width and height",
-                    'incest': "specified parent is already child of entity",
-                    'child overlap': "positions of children conflict/overlap with each other\nto disable: overlap=True in your container"
-                    }
-
-        if key in messages:
-            message = messages[key]
+        if parent:
+            parent.add_child(self, replace=True)
+            self._parent = parent
+            self._abs_pos = self._get_abs_pos()
         else:
-            message = 'unknown error'
-
-        super().__init__(f'invalid structure\n  ' + message)
+            self._parent = None

@@ -1,46 +1,52 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Unpack
 
+from ..entity import EntityKwargs
 from .element import Element
 
-if TYPE_CHECKING:
-    from ..container import Container
 
+class Text(Element):
+    def __init__(self,
+                 representation: list[str] | str | None = None,
+                 **kwargs: Unpack[EntityKwargs]):
+        """Representation in format ["First Line","Second Line", "Third Line"] or as string with '\\n'.
+        """
 
-class StaticText(Element):
-    def __init__(self, representation: list[str] | None = None,
-                 parent: Container | None = None,
-                 x: int = 0,
-                 y: int = 0,
-                 bold: bool = False,
-                 italic: bool = False,
-                 color: str | tuple[int, int, int] | None = None):
-        """representation in format ["First Line","Second Line", "Third Line"]"""
         self._str = ""
+        self.representation = representation
 
-        width = 0
+        super().__init__(**kwargs)
+
+    @property
+    def representation(self):
+        return self._repr
+
+    @representation.setter
+    def representation(self, representation: str | list[str] | None):
+
+        # convert multi line string into printable format
+        if isinstance(representation, str):
+            try:
+                self._repr = [
+                    representation.strip("\n") for representation in representation.split("\n")]
+            except:
+                raise Exception("Falty String")
+        elif representation != None:
+            self._repr = representation
+        else:
+            self._repr = []
 
         if representation:
-            for l in representation:
-                if not l.isprintable():
-                    raise Exception()
-                if self._str == "":
-                    self._str = l
-                else:
-                    self._str += '\n\033[{x}{direction}'+l
+            width = 0
+            for line in self._repr:
+                if not line.isprintable():
+                    raise Exception("Faulty String")
 
-                if len(l) > width:
-                    width = len(l)
-            height = len(representation)
+                if len(line) > width:
+                    width = len(line)
+            height = len(self._repr)
         else:
             width = 1
             height = 1
 
-        super().__init__(parent, x, y, width, height, bold, italic, color)
-
-    def __str__(self):
-        # for right indentation on every line
-        if self.x_abs > 0:
-            return self._str.format(x=self.x_abs, direction="C")
-        else:
-            return self._str.format(x=self.x_abs, direction="D")
+        self._dimension = (width, height)
