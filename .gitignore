@@ -1,6 +1,5 @@
 .vscode/
 dist/
-tests/
 __pycache__/
 test.py
 test.json

@@ -33,13 +33,13 @@ class Spinner(Animated):
 
         super().__init__(self._generate_frames(), frametime, **kwargs)
 
-    class SpinnerDict(TypedDict):
+    class _SpinnerDict(TypedDict):
         seq: str
         div: int
 
-    _default_spinner: SpinnerDict = {"seq": '|/-\\',
-                                     "div": 1}
-    _spinners: dict[str, SpinnerDict] = {
+    _default_spinner: _SpinnerDict = {"seq": '|/-\\',
+                                      "div": 1}
+    _spinners: dict[str, _SpinnerDict] = {
         "default": _default_spinner.copy()}
 
     @property
@@ -49,6 +49,10 @@ class Spinner(Animated):
     @property
     def div(self):
         return self._div
+
+    @property
+    def spinner(self):
+        return (self.seq, self.div)
 
     @classmethod
     def get_spinners(cls):
@@ -117,6 +121,7 @@ class Spinner(Animated):
 
 class SpinnerTypeError(Exception):
     """custom error handling to pinpoint error location"""
+
     def __init__(self, key: str, element: str):
         messages = {'msng_type': 'type does not exist',
                     'dupl_type': 'type already exists, consider: replace=True'}
