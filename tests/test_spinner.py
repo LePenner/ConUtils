@@ -56,7 +56,3 @@ class TestSpinner(unittest.TestCase):
         # test for division
         self.assertRaises(DivisionError, Spinner.load_json, os.path.dirname(
             __file__)+"/json/spinners_4.json")
-
-
-if __name__ == "__main__":
-    unittest.main()
