@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Unpack
 
 from ..entity import EntityKwargs
+from ...errors import ethrow
 from .element import Element
 
 
@@ -30,7 +31,7 @@ class Text(Element):
                 self._repr = [
                     representation.strip("\n") for representation in representation.split("\n")]
             except:
-                raise Exception("Falty String")
+                ethrow("TEXT", "faulty string")
         elif representation != None:
             self._repr = representation
         else:
@@ -40,7 +41,7 @@ class Text(Element):
             width = 0
             for line in self._repr:
                 if not line.isprintable():
-                    raise Exception("Faulty String")
+                    ethrow("TEXT", "faulty string")
 
                 if len(line) > width:
                     width = len(line)

@@ -4,3 +4,5 @@ tests/
 __pycache__/
 test.py
 test.json
+.test.py
+.vscode/

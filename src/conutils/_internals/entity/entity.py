@@ -187,8 +187,7 @@ class Entity:
 
         if type(color) == str:
             if color not in Color.colors:
-                raise Exception(
-                    'color does not exist, add it as a color or use rgb values')
+                ethrow("COLR", "not a color")
 
             self._color = color
             self._rgb = Color[color]
@@ -196,7 +195,7 @@ class Entity:
         elif type(color) == tuple:
             for i in color:
                 if 0 > i > 255:
-                    raise Exception('rgb values need to be between 0 and 255')
+                    ethrow("COLR", "faulty rgb")
 
             self._color = None
             self._rgb = color
@@ -206,8 +205,7 @@ class Entity:
             self._rgb = None
 
         else:
-            raise Exception(
-                'wrong color specification, need either keyword or rgb')
+            ethrow("COLR", "faulty format")
 
         self._display_rgb = self._get_display_rgb()
 

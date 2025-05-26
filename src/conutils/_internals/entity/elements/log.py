@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Callable, Unpack
 from conutils._internals.entity import EntityKwargs
 from .element import Element
+from ...errors import ethrow
 
 # add max length
 
@@ -72,7 +73,7 @@ class Log(Element):
         if not key in self._values or replace:
             self._values[key] = val
         else:
-            raise Exception  # --------------- make proper exception
+            ethrow("LOG", "key error")
 
     def log(self, msg: str, display: bool = True):
         if display == True:

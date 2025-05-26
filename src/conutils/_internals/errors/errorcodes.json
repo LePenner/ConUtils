@@ -3,7 +3,18 @@
         "parent double": "specified child already has parent associated, try 'replace=True'",
         "child not found": "not a child of given container",
         "edge conflict": "specified displacement conflicts with size of container,\nmake sure to set appropriate width and height",
-        "incest": "specified parent is already child of entity",
+        "circular inheritance": "specified parent is already child of entity",
         "child overlap": "positions of children conflict/overlap with each other\nto disable: overlap=True in your container"
+    },
+    "COLR": {
+        "not a color": "color does not exist, add it as a color or use rgb values",
+        "faulty rgb": "rgb values need to be between 0 and 255",
+        "faulty format": "wrong color format, need either keyword or rgb"
+    },
+    "LOG": {
+        "key error": "value with key already exists\nto overwrite key, set replace=True"
+    },
+    "TEXT": {
+        "faulty string": "faulty string"
     }
 }

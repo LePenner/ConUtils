@@ -96,7 +96,7 @@ class Container(Entity):
 
     def set_parent(self, parent: Container | None = None, replace: bool = False):
         if parent in self._children and not replace:
-            ethrow("ENTY", "incest")
+            ethrow("ENTY", "circular inheritance")
 
         if parent in self._children:
             self._children.remove(parent)
