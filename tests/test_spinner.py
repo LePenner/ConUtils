@@ -1,14 +1,9 @@
 import unittest
 import os
-import sys
-
-src_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/src"
-sys.path.insert(0, src_path)
-
 from conutils._internals.entity.elements.spinner import Spinner, FormatError, DivisionError, SpinnerTypeError  # noqa type: ignore
 
 
-class SpinnerTest(unittest.TestCase):
+class TestSpinner(unittest.TestCase):
 
     def test_wrong_initialization(self):
         self.assertRaises(SpinnerTypeError, Spinner, "wrong type")
