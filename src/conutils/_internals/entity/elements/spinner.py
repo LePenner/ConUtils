@@ -116,6 +116,7 @@ class Spinner(Animated):
 
 
 class SpinnerTypeError(Exception):
+    """custom error handling to pinpoint error location"""
     def __init__(self, key: str, element: str):
         messages = {'msng_type': 'type does not exist',
                     'dupl_type': 'type already exists, consider: replace=True'}
