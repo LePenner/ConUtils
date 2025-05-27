@@ -1,6 +1,6 @@
 import unittest
 import os
-from conutils._internals.entity.elements.spinner import Spinner, FormatError, DivisionError, SpinnerTypeError  # noqa type: ignore
+from conutils._internals.entity.elements.spinner import Spinner, FormatError, DivisionError, SpinnerTypeError
 
 
 class TestSpinner(unittest.TestCase):
@@ -35,10 +35,13 @@ class TestSpinner(unittest.TestCase):
         Spinner.reg_spn_type("test type", "second overwrite", 1, True)
 
     def test_load_spinners(self):
-        Spinner.load_json(os.path.dirname(__file__)+"/json/spinners_1.json")
+
+        PATH = os.path.dirname(__file__)
+
+        Spinner.load_json(PATH+"/json/spinners_1.json")
         self.assertEqual(Spinner.get_spinners()[
                          "default"], {'seq':  '|/-\\', 'div': 1})
-        Spinner.load_json(os.path.dirname(__file__) +
+        Spinner.load_json(PATH +
                           "/json/spinners_1.json", replace=True)
         self.assertNotEqual(Spinner.get_spinners()[
             "default"], {'seq':  '|/-\\', 'div': 1})
@@ -46,13 +49,13 @@ class TestSpinner(unittest.TestCase):
         Spinner.reset_spinners()
 
         # test for div andseq type
-        self.assertRaises(FormatError, Spinner.load_json, os.path.dirname(
-            __file__)+"/json/spinners_2.json")
+        self.assertRaises(FormatError, Spinner.load_json,
+                          PATH+"/json/spinners_2.json")
 
         # test for keys
-        self.assertRaises(FormatError, Spinner.load_json, os.path.dirname(
-            __file__)+"/json/spinners_3.json")
+        self.assertRaises(FormatError, Spinner.load_json,
+                          PATH+"/json/spinners_3.json")
 
         # test for division
-        self.assertRaises(DivisionError, Spinner.load_json, os.path.dirname(
-            __file__)+"/json/spinners_4.json")
+        self.assertRaises(DivisionError, Spinner.load_json,
+                          PATH+"/json/spinners_4.json")
