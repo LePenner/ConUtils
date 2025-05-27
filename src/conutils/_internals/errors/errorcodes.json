@@ -8,7 +8,7 @@
     },
     "COLR": {
         "not a color": "color does not exist, add it as a color or use rgb values",
-        "faulty rgb": "rgb values need to be between 0 and 255",
+        "faulty rgb": "rgb values need to be 0-255",
         "faulty format": "wrong color format, need either keyword or rgb"
     },
     "LOG": {

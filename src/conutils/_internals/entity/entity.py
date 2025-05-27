@@ -37,6 +37,9 @@ class Entity:
             - x
             - y
             - pos
+            - bold
+            - italic
+            - strike_through
             - color
             - parent
         read only:
@@ -45,7 +48,7 @@ class Entity:
             - abs_pos
             - height
             - width
-            - dimension
+            - dimensions
             - rgb
             - display_rgb
     """
@@ -197,7 +200,7 @@ class Entity:
 
         elif type(color) == tuple:
             for i in color:
-                if 0 > i > 255:
+                if i < 0 or i > 255:
                     ethrow("COLR", "faulty rgb")
 
             self._color = None
