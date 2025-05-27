@@ -5,8 +5,9 @@ if TYPE_CHECKING:
     from ..entity.elements import Element
     from ..console import Console
 
-#             screen>line>obj(pos, rep, bold, italic, rgb(r,g,b)|None)
-obj_type = tuple[int, str, bool, bool, tuple[int, int, int] | None]
+#             screen>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
+obj_type = tuple[int, str, tuple[bool, bool, bool],
+                 tuple[int, int, int] | None]
 line_type = list[obj_type]
 screen_type = list[line_type]
 
@@ -57,7 +58,7 @@ class Output:
             line = element.y_abs+i
             index = self.binsert_algo(element.x_abs, self._screen[line])
             self._screen[line].insert(
-                index, (element.x_abs, rep, element.bold, element.italic, element.display_rgb))
+                index, (element.x_abs, rep, (element.bold, element.italic, element.strike_through), element.display_rgb))
 
     def compile(self):
         out = ""
@@ -69,14 +70,14 @@ class Output:
             for j, obj in enumerate(line):
                 if j > 0:
                     # add spacing
-                    # starting position - starting position - len(obj)
+                    # starting position - prev starting position - len(obj)
                     out += " "*(obj[0] - line[j-1][0] - len(line[j-1][1]))
                 else:
                     out += " "*obj[0]
 
                 # check for color
-                if obj[4]:
-                    out += Output.get_color(obj[4])
+                if obj[3]:
+                    out += Output.get_color(obj[3])
                 else:
                     # reset color
                     out += "\033[39m"
