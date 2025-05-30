@@ -14,30 +14,36 @@ class Text(Element):
         """
 
         self._str = ""
-        self.representation = representation
+        self._repr = self._get_proper_repr(representation)
+
+        dimension: tuple[int, int] = self._get_dimensions(self._repr)
+        kwargs["width"] = dimension[0]
+        kwargs["height"] = dimension[1]
 
         super().__init__(**kwargs)
 
-    @property
-    def representation(self):
-        return self._repr
+    def _get_proper_repr(self, representation: str | list[str] | None):
 
-    @representation.setter
-    def representation(self, representation: str | list[str] | None):
+        repr = []
 
         # convert multi line string into printable format
         if isinstance(representation, str):
             try:
-                self._repr = [
+                repr = [
                     representation.strip("\n") for representation in representation.split("\n")]
             except:
                 ethrow("TEXT", "faulty string")
         elif representation != None:
-            self._repr = representation
-        else:
-            self._repr = []
+            repr = representation
 
-        if representation:
+        return repr
+
+    def _get_dimensions(self, representation: str | list[str] | None):
+
+        # convert multi line string into printable format
+        self._repr = self._get_proper_repr(representation)
+
+        if self._repr:
             width = 0
             for line in self._repr:
                 if not line.isprintable():
@@ -50,4 +56,14 @@ class Text(Element):
             width = 1
             height = 1
 
-        self._dimension = (width, height)
+        return (width, height)
+
+    @property
+    def representation(self):
+        return self._repr
+
+    @representation.setter
+    def representation(self, representation: str | list[str] | None):
+
+        self._repr = self._get_proper_repr(representation)
+        self._dimension = self._get_dimensions(representation)

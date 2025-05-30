@@ -16,6 +16,7 @@ class EntityKwargs(TypedDict, total=False):
     height: int
     bold: bool
     italic: bool
+    strike_through: bool
     color: tuple[int, int, int] | str | None
 
 
@@ -36,6 +37,9 @@ class Entity:
             - x
             - y
             - pos
+            - bold
+            - italic
+            - strike_through
             - color
             - parent
         read only:
@@ -44,7 +48,7 @@ class Entity:
             - abs_pos
             - height
             - width
-            - dimension
+            - dimensions
             - rgb
             - display_rgb
     """
@@ -59,6 +63,7 @@ class Entity:
         height = kwargs.get("height", 1)
         bold = kwargs.get("bold", False)
         italic = kwargs.get("italic", False)
+        strike_through = kwargs.get("strike_through", False)
         color = kwargs.get("color", None)
 
         self._parent = parent
@@ -72,8 +77,9 @@ class Entity:
 
         self._abs_pos = self._get_abs_pos()
 
-        self._bold = bold
-        self._italic = italic
+        self.bold = bold
+        self.italic = italic
+        self.strike_through = strike_through
         self.color = color
 
     # @protected
@@ -194,7 +200,7 @@ class Entity:
 
         elif type(color) == tuple:
             for i in color:
-                if 0 > i > 255:
+                if i < 0 or i > 255:
                     ethrow("COLR", "faulty rgb")
 
             self._color = None
@@ -218,14 +224,6 @@ class Entity:
     @property
     def display_rgb(self) -> tuple[int, int, int] | None:
         return self._display_rgb
-
-    @property
-    def bold(self):
-        return self._bold
-
-    @property
-    def italic(self):
-        return self._italic
 
     @property
     def parent(self) -> Container | None:

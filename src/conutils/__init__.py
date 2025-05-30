@@ -20,8 +20,7 @@ from ._internals.toolkit import Color
 from ._internals.entity.elements import Spinner, Text, Log
 from ._internals.entity.container import Container
 
-LOGO = """
-  ,ad8888ba,
+LOGO = """,ad8888ba,
  d8"'    `"8b
 d8'
 88    88        88
