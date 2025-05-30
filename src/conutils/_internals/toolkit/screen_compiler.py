@@ -39,6 +39,9 @@ class Output:
             # >>> no x == lst[piv][0]
             if x > lst[piv][0]:
                 return piv+Output.binsert_algo(x, lst[piv+1:])+1
+            elif x == lst[piv][0]:
+                lst.pop(piv)
+                return piv
             else:
                 return Output.binsert_algo(x, lst[:piv])
         else:
