@@ -1,14 +1,21 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
     from ..entity.elements import Element
     from ..console import Console
 
 #             screen>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
-obj_type = tuple[int, str, tuple[bool, bool, bool],
-                 tuple[int, int, int] | None]
-line_type = list[obj_type]
+
+
+class ObjDict(TypedDict):
+    pos: int
+    rep: str
+    format: tuple[bool, bool, bool]
+    color: tuple[int, int, int] | None
+
+
+line_type = list[ObjDict]
 screen_type = list[line_type]
 
 
@@ -28,22 +35,18 @@ class Output:
             return "\033[39;49m"
 
     @staticmethod
-    def binsert_algo(x: int, lst: line_type) -> int:
+    def binsert_algo(obj: Element, lst: line_type) -> int:
         """Searches for index recursively."""
 
+        x = obj.x_abs
         piv = len(lst)//2
 
         if len(lst) > 0:
 
-            # for normal usecases no overlap in representation positions
-            # >>> no x == lst[piv][0]
-            if x > lst[piv][0]:
-                return piv+Output.binsert_algo(x, lst[piv+1:])+1
-            elif x == lst[piv][0]:
-                lst.pop(piv)
-                return piv
+            if x > lst[piv]["pos"]:
+                return piv+Output.binsert_algo(obj, lst[piv:])+1
             else:
-                return Output.binsert_algo(x, lst[:piv])
+                return Output.binsert_algo(obj, lst[:piv])
         else:
             return 0
 
@@ -58,10 +61,44 @@ class Output:
 
         for i, rep in enumerate(element.representation):
 
-            line = element.y_abs+i
-            index = self.binsert_algo(element.x_abs, self._screen[line])
-            self._screen[line].insert(
-                index, (element.x_abs, rep, (element.bold, element.italic, element.strike_through), element.display_rgb))
+            line = self._screen[element.y_abs+i]
+            index = self.binsert_algo(element, line)
+
+            # check overlap
+            if len(line) > 0:
+                obj = line[index]
+
+                # check if overlap
+                if obj["pos"] <= element.x_abs + element.width and \
+                        obj["pos"] + len(obj["rep"]) >= element.x_abs:
+
+                    to_split = line.pop(index)
+
+                    # calculate left split
+                    if to_split["pos"] < element.x_abs:
+                        l_split: ObjDict = {
+                            "pos": to_split["pos"],
+                            "rep": to_split["rep"][:element.x_abs - to_split["pos"]],
+                            "format": to_split["format"],
+                            "color": to_split["color"]
+                        }
+                        line.insert(index, l_split)
+
+                    # calculate right split
+                    if to_split["pos"] + len(to_split["rep"]) > element.x_abs + element.width:
+                        r_split: ObjDict = {
+                            "pos": element.x_abs + element.width,
+                            "rep": to_split["rep"][(element.x_abs + element.width) - to_split["pos"]:],
+                            "format": to_split["format"],
+                            "color": to_split["color"]
+                        }
+                        line.insert(index, r_split)
+
+            line.insert(
+                index, {"pos": element.x_abs,
+                        "rep": rep,
+                        "format": (element.bold, element.italic, element.strike_through),
+                        "color": element.display_rgb})
 
     def compile(self):
         out = ""
@@ -74,24 +111,26 @@ class Output:
                 if j > 0:
                     # add spacing
                     # starting position - prev starting position - len(obj)
-                    out += " "*(obj[0] - line[j-1][0] - len(line[j-1][1]))
+                    out += " "*(obj["pos"] - line[j-1]
+                                ["pos"] - len(line[j-1]["rep"]))
                 else:
-                    out += " "*obj[0]
+                    out += " "*obj["pos"]
 
                 # check for color
-                if obj[3]:
-                    out += Output.get_color(obj[3])
+                if obj["color"]:
+                    out += Output.get_color(obj["color"])
                 else:
                     # reset color
                     out += "\033[39m"
 
                 # add representation
-                out += obj[1]
+                out += obj["rep"]
 
                 # if last object in line:
                 if len(line) == j+1:
                     # fill rest of line with spaces
-                    out += " "*(self.console.width - obj[0] - len(obj[1]))
+                    out += " "*(self.console.width -
+                                obj["pos"] - len(obj["rep"]))
 
             # add new line at end of line
             if len(self._screen) != i+1:
