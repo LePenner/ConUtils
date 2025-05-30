@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ConUtils"
-version = "0.0.7a"
+version = "0.0.8a"
 authors = [{ name = "Kira", email = "monoclecatstudio@gmail.com" }]
 description = "a collection of console output fomating methods"
 readme = "README.md"
