@@ -14,13 +14,18 @@ class Console(Container):
     define an `update` function to configure runtime behavior. 
     """
 
-    def __init__(self, overlap: bool = False, fps: int = 100, **kwargs: Unpack[EntityKwargs]):
+    def __init__(self,
+                 overlap: bool = False,
+                 fps: int = 100,
+                 **kwargs: Unpack[EntityKwargs]):
         self._stop_flag = False
         self.fps = fps
 
         # set default length and height to terminal
-        kwargs["width"] = kwargs.get("width", os.get_terminal_size()[0])
-        kwargs["height"] = kwargs.get("height", os.get_terminal_size()[1])
+        kwargs["width"] = kwargs.get("width") or\
+            os.get_terminal_size()[0]
+        kwargs["height"] = kwargs.get("height") or\
+            kwargs.get("height", os.get_terminal_size()[1])
 
         super().__init__(overlap=overlap, **kwargs)
 
