@@ -3,6 +3,8 @@ from conutils._internals.entity.entity import Entity
 from conutils import Container, Color
 from conutils._internals.errors.errors import ConUtils_error
 
+# TODO:  make a template to create a file with similar tests
+
 
 class TestEntity(unittest.TestCase):
 

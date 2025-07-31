@@ -98,4 +98,4 @@ class Console(Container):
             # lets user add custom functionality on runtime
             # checks for function update() in main file
             if getattr(__main__, "update", None):
-                __main__.update()
+                __main__.update()  # type:  ignore
