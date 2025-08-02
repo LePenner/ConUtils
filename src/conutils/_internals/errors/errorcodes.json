@@ -16,5 +16,8 @@
     },
     "TEXT": {
         "faulty string": "faulty string"
+    },
+    "ELMT": {
+        "faulty frames": "Wrong frame format, shuld be:\n list[str] or list[list[str]]"
     }
 }

@@ -1,8 +1,9 @@
 import json
 import os
+from typing import NoReturn
 
 
-def ethrow(key: str, error_code: str):
+def ethrow(key: str, error_code: str) -> NoReturn:
 
     abs_dir = os.path.dirname(__file__)
     rel_path = "errorcodes.json"
