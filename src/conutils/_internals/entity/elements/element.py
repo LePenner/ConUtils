@@ -34,15 +34,15 @@ class Animated(Element):
 
         super().__init__(**kwargs)
 
-    def __str__(self):
-        return self._frames[self._cur]
+    '''def __str__(self):
+        return self._frames[self._cur]'''
 
     def _get_proper_frames(self, frames: None | list[str] | list[list[str]]) -> list[list[str]]:
 
         if frames == None:
             return [[]]
 
-        output: list[list[str]] = [[]]
+        output: list[list[str]] = []
 
         for frame in frames:
             if isinstance(frame, str):
