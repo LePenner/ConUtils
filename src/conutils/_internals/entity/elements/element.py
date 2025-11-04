@@ -72,18 +72,11 @@ class Animated(Element):
     async def _animation_loop(self) -> None:
         while True:
             await asyncio.sleep(self._frametime)
-            self._draw = True
+            self.draw_next()
 
     @property
     def representation(self):
         return self._frames[self._cur]
-
-    @property
-    def draw_flag(self) -> bool:
-        return self._draw
-
-    def reset_drawflag(self):
-        self._draw = False
 
     def get_frame(self):
         return self._frames[self._cur]

@@ -2,8 +2,9 @@ import __main__
 import os
 import asyncio
 from typing import Unpack
+from .entity.elements import Element
 from .entity.container import Container
-from .entity.elements import Animated
+# from .entity.elements import Animated
 from .toolkit.screen_compiler import Output
 from .entity.entity import EntityKwargs
 
@@ -83,19 +84,18 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.sleep(1/self.fps)
-            for child in children:
-                if isinstance(child, Animated):
-                    if child.draw_flag == True:
-                        child.reset_drawflag()
-                        child.draw_next()
+            await asyncio.gather(
+                asyncio.sleep(1/self.fps),
+                self.calc(children))
 
-                self._otp.add(child)
+    async def calc(self, children: list[Element]):
+        for child in children:
+            self._otp.add(child)
 
-            print(self._otp.compile(), end="\r")
-            self._otp.clear()
+        print(self._otp.compile(), end="\r")
+        self._otp.clear()
 
-            # lets user add custom functionality on runtime
-            # checks for function update() in main file
-            if getattr(__main__, "update", None):
-                __main__.update()  # type:  ignore
+        # lets user add custom functionality on runtime
+        # checks for function update() in main file
+        if getattr(__main__, "update", None):
+            __main__.update()  # type:  ignore
