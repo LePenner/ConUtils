@@ -85,7 +85,7 @@ class Console(Container):
         # check for updates
         while self._stop_flag == False:
 
-            if self.fps != 0:
+            if self.fps:
                 await asyncio.gather(
                     asyncio.sleep(1/self.fps),
                     self.calc(children))

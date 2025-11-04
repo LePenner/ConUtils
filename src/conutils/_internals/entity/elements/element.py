@@ -33,8 +33,8 @@ class Animated(Element):
 
         super().__init__(**kwargs)
 
-    '''def __str__(self):
-        return self._frames[self._cur]'''
+    def __str__(self):
+        return str(self._frames[self._cur])
 
     def _get_proper_frames(self, frames: None | list[str] | list[list[str]]) -> list[list[str]]:
 
