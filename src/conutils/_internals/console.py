@@ -17,7 +17,7 @@ class Console(Container):
 
     def __init__(self,
                  overlap: bool = False,
-                 fps: int = 100,
+                 fps: int = 0,
                  **kwargs: Unpack[EntityKwargs]):
         self._stop_flag = False
         self.fps = fps
@@ -84,9 +84,14 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.gather(
-                asyncio.sleep(1/self.fps),
-                self.calc(children))
+
+            if self.fps != 0:
+                await asyncio.gather(
+                    asyncio.sleep(1/self.fps),
+                    self.calc(children))
+            else:
+                await asyncio.gather(
+                    self.calc(children))
 
     async def calc(self, children: list[Element]):
         for child in children:

@@ -8,7 +8,6 @@ from ..entity import Entity, EntityKwargs
 
 
 class Element(Entity):
-    """only use as abstract class, cannot handle dynamic heigth and width adjustment"""
 
     def __init__(self, **kwargs: Unpack[EntityKwargs]):
 
