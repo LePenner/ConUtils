@@ -41,12 +41,17 @@ class Output:
         x = obj.x_abs
         piv = len(lst)//2
 
-        if len(lst) > 0:
+        if len(lst) > 1:
 
             if x > lst[piv]["pos"]:
                 return piv+Output.binsert_algo(obj, lst[piv:])+1
             else:
                 return Output.binsert_algo(obj, lst[:piv])
+        elif len(lst) == 1:
+            if x > lst[piv]["pos"]:
+                return 1
+            else:
+                return 0
         else:
             return 0
 
@@ -64,36 +69,6 @@ class Output:
             line = self._screen[element.y_abs+i]
             index = self.binsert_algo(element, line)
 
-            # check overlap
-            if len(line) > 0:
-                obj = line[index]
-
-                # check if overlap
-                if obj["pos"] <= element.x_abs + element.width and \
-                        obj["pos"] + len(obj["rep"]) >= element.x_abs:
-
-                    to_split = line.pop(index)
-
-                    # calculate left split
-                    if to_split["pos"] < element.x_abs:
-                        l_split: ObjDict = {
-                            "pos": to_split["pos"],
-                            "rep": to_split["rep"][:element.x_abs - to_split["pos"]],
-                            "format": to_split["format"],
-                            "color": to_split["color"]
-                        }
-                        line.insert(index, l_split)
-
-                    # calculate right split
-                    if to_split["pos"] + len(to_split["rep"]) > element.x_abs + element.width:
-                        r_split: ObjDict = {
-                            "pos": element.x_abs + element.width,
-                            "rep": to_split["rep"][(element.x_abs + element.width) - to_split["pos"]:],
-                            "format": to_split["format"],
-                            "color": to_split["color"]
-                        }
-                        line.insert(index, r_split)
-
             line.insert(
                 index, {"pos": element.x_abs,
                         "rep": rep,
@@ -101,6 +76,47 @@ class Output:
                         "color": element.display_rgb})
 
     def compile(self):
+        if self.console.overlap == True:
+            for i, line in enumerate(self._screen):
+
+                for j, obj in enumerate(line):
+
+                    if j > 0:
+
+                        prev_obj = line[j-1]
+                        prev_obj_pos = prev_obj["pos"]
+                        prev_obj_width = len(prev_obj["rep"])
+
+                        obj_pos = obj["pos"]
+                        obj_width = len(obj["rep"])
+
+                        # check with neighboring objects for overlaps
+                        if prev_obj_pos <= obj_pos + obj_width or \
+                                prev_obj_pos + prev_obj_width >= obj_pos:
+
+                            to_split = line.pop(j-1)
+
+                            # calculate left split
+                            if to_split["pos"] < obj_pos:
+                                l_split: ObjDict = {
+                                    "pos": to_split["pos"],
+                                    "rep": to_split["rep"][:obj_pos - to_split["pos"]],
+                                    "format": to_split["format"],
+                                    "color": to_split["color"]
+                                }
+                                line.insert(j-1, l_split)
+                                j += 1
+
+                            # calculate right split
+                            if to_split["pos"] + len(to_split["rep"]) > obj_pos + obj_width:
+                                r_split: ObjDict = {
+                                    "pos": obj_pos + obj_width,
+                                    "rep": to_split["rep"][(obj_pos + obj_width) - to_split["pos"]:],
+                                    "format": to_split["format"],
+                                    "color": to_split["color"]
+                                }
+                                line.insert(j, r_split)
+
         out = ""
         for i, line in enumerate(self._screen):
             # fill line with spaces if empty
