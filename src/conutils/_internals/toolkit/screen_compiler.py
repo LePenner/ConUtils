@@ -77,45 +77,61 @@ class Output:
 
     def compile(self):
         if self.console.overlap == True:
-            for i, line in enumerate(self._screen):
+            for line in self._screen:
 
-                for j, obj in enumerate(line):
+                # j as line index
+                j: int = 1
+                while True:
 
-                    if j > 0:
+                    if len(line) <= j:
+                        break
 
-                        prev_obj = line[j-1]
-                        prev_obj_pos = prev_obj["pos"]
-                        prev_obj_width = len(prev_obj["rep"])
+                    # previous object in list
+                    prev_obj = line[j-1]
+                    prev_obj_pos = prev_obj["pos"]
+                    prev_obj_width = len(prev_obj["rep"])
 
-                        obj_pos = obj["pos"]
-                        obj_width = len(obj["rep"])
+                    # point of reference
+                    obj = line[j]
+                    obj_pos = obj["pos"]
+                    obj_width = len(obj["rep"])
 
-                        # check with neighboring objects for overlaps
-                        if prev_obj_pos <= obj_pos + obj_width or \
-                                prev_obj_pos + prev_obj_width >= obj_pos:
+                    # check objects for overlap
+                    if prev_obj_pos <= obj_pos + obj_width or \
+                            prev_obj_pos + prev_obj_width >= obj_pos:
 
-                            to_split = line.pop(j-1)
+                        # remove prev_obj from line
+                        to_split = line.pop(j-1)
 
-                            # calculate left split
-                            if to_split["pos"] < obj_pos:
-                                l_split: ObjDict = {
-                                    "pos": to_split["pos"],
-                                    "rep": to_split["rep"][:obj_pos - to_split["pos"]],
-                                    "format": to_split["format"],
-                                    "color": to_split["color"]
-                                }
-                                line.insert(j-1, l_split)
-                                j += 1
+                        # calculate left side of split
+                        # how much is visible
+                        if to_split["pos"] < obj_pos:
+                            l_split: ObjDict = {
+                                "pos": to_split["pos"],
+                                "rep": to_split["rep"][:obj_pos - to_split["pos"]],
+                                "format": to_split["format"],
+                                "color": to_split["color"]
+                            }
+                            line.insert(j-1, l_split)
 
-                            # calculate right split
-                            if to_split["pos"] + len(to_split["rep"]) > obj_pos + obj_width:
-                                r_split: ObjDict = {
-                                    "pos": obj_pos + obj_width,
-                                    "rep": to_split["rep"][(obj_pos + obj_width) - to_split["pos"]:],
-                                    "format": to_split["format"],
-                                    "color": to_split["color"]
-                                }
-                                line.insert(j, r_split)
+                            # increment j because we added an element to the left
+                            j += 1
+
+                        # calculate right side of split
+                        # how much is visible
+                        if prev_obj_pos + prev_obj_width > obj_pos + obj_width:
+                            r_split: ObjDict = {
+                                "pos": obj_pos + obj_width,
+                                "rep": to_split["rep"][(obj_pos + obj_width) - to_split["pos"]:],
+                                "format": to_split["format"],
+                                "color": to_split["color"]
+                            }
+                            line.insert(j+1, r_split)
+
+                    # if objects dont overlap go to next object
+                    # Note: WE DO NOT INCREMENT IF THERE IS OVERLAP!
+                    else:
+                        j += 1
 
         out = ""
         for i, line in enumerate(self._screen):
