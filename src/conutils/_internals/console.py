@@ -2,8 +2,9 @@ import __main__
 import os
 import asyncio
 from typing import Unpack
+from .entity.elements import Element
 from .entity.container import Container
-from .entity.elements import Animated
+# from .entity.elements import Animated
 from .toolkit.screen_compiler import Output
 from .entity.entity import EntityKwargs
 
@@ -16,7 +17,7 @@ class Console(Container):
 
     def __init__(self,
                  overlap: bool = False,
-                 fps: int = 100,
+                 fps: int = 0,
                  **kwargs: Unpack[EntityKwargs]):
         self._stop_flag = False
         self.fps = fps
@@ -83,19 +84,23 @@ class Console(Container):
 
         # check for updates
         while self._stop_flag == False:
-            await asyncio.sleep(1/self.fps)
-            for child in children:
-                if isinstance(child, Animated):
-                    if child.draw_flag == True:
-                        child.reset_drawflag()
-                        child.draw_next()
 
-                self._otp.add(child)
+            if self.fps:
+                await asyncio.gather(
+                    asyncio.sleep(1/self.fps),
+                    self.calc(children))
+            else:
+                await asyncio.gather(
+                    self.calc(children))
 
-            print(self._otp.compile(), end="\r")
-            self._otp.clear()
+    async def calc(self, children: list[Element]):
+        for child in children:
+            self._otp.add(child)
 
-            # lets user add custom functionality on runtime
-            # checks for function update() in main file
-            if getattr(__main__, "update", None):
-                __main__.update()  # type:  ignore
+        print(self._otp.compile(), end="\r")
+        self._otp.clear()
+
+        # lets user add custom functionality on runtime
+        # checks for function update() in main file
+        if getattr(__main__, "update", None):
+            __main__.update()  # type:  ignore
