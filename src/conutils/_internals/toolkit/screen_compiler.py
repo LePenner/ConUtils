@@ -97,35 +97,35 @@ class Output:
                     obj_width = len(obj["rep"])
 
                     # check objects for overlap
-                    if prev_obj_pos <= obj_pos + obj_width or \
+                    if prev_obj_pos <= obj_pos + obj_width and \
                             prev_obj_pos + prev_obj_width >= obj_pos:
 
+                        split: ObjDict = {
+                            "pos": prev_obj_pos,
+                            "rep": "",
+                            "format": prev_obj["format"],
+                            "color": prev_obj["color"]
+                        }
+
                         # remove prev_obj from line
-                        to_split = line.pop(j-1)
+                        line.pop(j-1)
 
                         # calculate left side of split
                         # how much is visible
-                        if to_split["pos"] < obj_pos:
-                            l_split: ObjDict = {
-                                "pos": to_split["pos"],
-                                "rep": to_split["rep"][:obj_pos - to_split["pos"]],
-                                "format": to_split["format"],
-                                "color": to_split["color"]
-                            }
+                        if prev_obj_pos < obj_pos:
+                            l_split = split.copy()
+                            l_split["rep"] = prev_obj["rep"][:obj_pos - prev_obj_pos]
                             line.insert(j-1, l_split)
-
                             # increment j because we added an element to the left
                             j += 1
 
                         # calculate right side of split
                         # how much is visible
                         if prev_obj_pos + prev_obj_width > obj_pos + obj_width:
-                            r_split: ObjDict = {
-                                "pos": obj_pos + obj_width,
-                                "rep": to_split["rep"][(obj_pos + obj_width) - to_split["pos"]:],
-                                "format": to_split["format"],
-                                "color": to_split["color"]
-                            }
+                            r_split = split.copy()
+                            r_split["rep"] = prev_obj["rep"][(
+                                obj_pos + obj_width) - prev_obj_pos:]
+                            r_split["pos"] += obj_width
                             line.insert(j+1, r_split)
 
                     # if objects dont overlap go to next object
