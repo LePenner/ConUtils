@@ -1,6 +1,7 @@
 import __main__
 import os
 import asyncio
+import time
 from typing import Unpack
 from .entity.elements import Element
 from .entity.container import Container
@@ -12,7 +13,7 @@ from .entity.entity import EntityKwargs
 class Console(Container):
     """Console handles the output of any child screens and lines to the terminal.
 
-    define an `update` function to configure runtime behavior. 
+    define an `update` function to configure runtime behavior.
     """
 
     def __init__(self,
@@ -67,12 +68,12 @@ class Console(Container):
         self.hide_cursor()
         print("\033[s", end="")
         try:
-            asyncio.run(self._run_async())
+            self._run_async()
             self._cleanup()
         except KeyboardInterrupt:
             self._cleanup()
 
-    async def _run_async(self):
+    def _run_async(self):
 
         children = self._collect_children()
 
@@ -82,25 +83,30 @@ class Console(Container):
                 # _animation_loop() is protected
                 asyncio.create_task(child._animation_loop())  # type: ignore
 
-        # check for updates
+        # avg error of about -0.5 ms
+        def tick_generator():
+            t = time.perf_counter()
+            while True:
+                t += 1/self.fps
+                yield max(t - time.perf_counter(), 0)
+        tick = tick_generator()
+
         while self._stop_flag == False:
 
-            if self.fps:
-                await asyncio.gather(
-                    asyncio.sleep(1/self.fps),
-                    self.calc(children))
-            else:
-                await asyncio.gather(
-                    self.calc(children))
+            # lets user add custom functionality on runtime
+            # checks for function update() in main file
+            if getattr(__main__, "update", None):
+                __main__.update()  # type:  ignore
 
-    async def calc(self, children: list[Element]):
+            if self.fps:
+                self.calc(children)
+                time.sleep(next(tick))
+            else:
+                self.calc(children)
+
+    def calc(self, children: list[Element]):
         for child in children:
             self._otp.add(child)
 
         print(self._otp.compile(), end="\r")
         self._otp.clear()
-
-        # lets user add custom functionality on runtime
-        # checks for function update() in main file
-        if getattr(__main__, "update", None):
-            __main__.update()  # type:  ignore
