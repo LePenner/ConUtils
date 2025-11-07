@@ -27,7 +27,7 @@ class Output:
         self.clear()
 
     @staticmethod
-    def get_color(color: tuple[int, int, int] | None):
+    def _get_color(color: tuple[int, int, int] | None):
         if color:
             r, g, b = color
             return f"\033[38;2;{r};{g};{b}m"
@@ -35,7 +35,7 @@ class Output:
             return "\033[39;49m"
 
     @staticmethod
-    def binsert_algo(obj: Element, lst: line_type) -> int:
+    def _binsert_algo(obj: Element, lst: line_type) -> int:
         """Searches for index recursively."""
 
         x = obj.x_abs
@@ -44,9 +44,9 @@ class Output:
         if len(lst) > 1:
 
             if x > lst[piv]["pos"]:
-                return piv+Output.binsert_algo(obj, lst[piv:])+1
+                return piv+Output._binsert_algo(obj, lst[piv:])+1
             else:
-                return Output.binsert_algo(obj, lst[:piv])
+                return Output._binsert_algo(obj, lst[:piv])
         elif len(lst) == 1:
             if x > lst[piv]["pos"]:
                 return 1
@@ -54,6 +54,64 @@ class Output:
                 return 0
         else:
             return 0
+
+    def _overlap_handler(self):
+
+        for line in self._screen:
+
+            # j as line index
+            j: int = 1
+            while True:
+
+                if len(line) <= j:
+                    break
+
+                # previous object in list
+                prev_obj = line[j-1]
+                prev_obj_pos = prev_obj["pos"]
+                prev_obj_width = len(prev_obj["rep"])
+
+                # point of reference
+                obj = line[j]
+                obj_pos = obj["pos"]
+                obj_width = len(obj["rep"])
+
+                # check objects for overlap
+                if prev_obj_pos <= obj_pos + obj_width and \
+                        prev_obj_pos + prev_obj_width >= obj_pos:
+
+                    split: ObjDict = {
+                        "pos": prev_obj_pos,
+                        "rep": "",
+                        "format": prev_obj["format"],
+                        "color": prev_obj["color"]
+                    }
+
+                    # remove prev_obj from line
+                    line.pop(j-1)
+
+                    # calculate left side of split
+                    # how much is visible
+                    if prev_obj_pos < obj_pos:
+                        l_split = split.copy()
+                        l_split["rep"] = prev_obj["rep"][:obj_pos - prev_obj_pos]
+                        line.insert(j-1, l_split)
+                        # increment j because we added an element to the left
+                        j += 1
+
+                    # calculate right side of split
+                    # how much is visible
+                    if prev_obj_pos + prev_obj_width > obj_pos + obj_width:
+                        r_split = split.copy()
+                        r_split["rep"] = prev_obj["rep"][(
+                            obj_pos + obj_width) - prev_obj_pos:]
+                        r_split["pos"] += obj_width
+                        line.insert(j+1, r_split)
+
+                # if objects dont overlap go to next object
+                # Note: WE DO NOT INCREMENT IF THERE IS OVERLAP!
+                else:
+                    j += 1
 
     def clear(self):
         self._screen: screen_type = [[] for _ in range(self.console.height)]
@@ -67,7 +125,7 @@ class Output:
         for i, rep in enumerate(element.representation):
 
             line = self._screen[element.y_abs+i]
-            index = self.binsert_algo(element, line)
+            index = self._binsert_algo(element, line)
 
             line.insert(
                 index, {"pos": element.x_abs,
@@ -77,61 +135,7 @@ class Output:
 
     def compile(self):
         if self.console.overlap == True:
-            for line in self._screen:
-
-                # j as line index
-                j: int = 1
-                while True:
-
-                    if len(line) <= j:
-                        break
-
-                    # previous object in list
-                    prev_obj = line[j-1]
-                    prev_obj_pos = prev_obj["pos"]
-                    prev_obj_width = len(prev_obj["rep"])
-
-                    # point of reference
-                    obj = line[j]
-                    obj_pos = obj["pos"]
-                    obj_width = len(obj["rep"])
-
-                    # check objects for overlap
-                    if prev_obj_pos <= obj_pos + obj_width and \
-                            prev_obj_pos + prev_obj_width >= obj_pos:
-
-                        split: ObjDict = {
-                            "pos": prev_obj_pos,
-                            "rep": "",
-                            "format": prev_obj["format"],
-                            "color": prev_obj["color"]
-                        }
-
-                        # remove prev_obj from line
-                        line.pop(j-1)
-
-                        # calculate left side of split
-                        # how much is visible
-                        if prev_obj_pos < obj_pos:
-                            l_split = split.copy()
-                            l_split["rep"] = prev_obj["rep"][:obj_pos - prev_obj_pos]
-                            line.insert(j-1, l_split)
-                            # increment j because we added an element to the left
-                            j += 1
-
-                        # calculate right side of split
-                        # how much is visible
-                        if prev_obj_pos + prev_obj_width > obj_pos + obj_width:
-                            r_split = split.copy()
-                            r_split["rep"] = prev_obj["rep"][(
-                                obj_pos + obj_width) - prev_obj_pos:]
-                            r_split["pos"] += obj_width
-                            line.insert(j+1, r_split)
-
-                    # if objects dont overlap go to next object
-                    # Note: WE DO NOT INCREMENT IF THERE IS OVERLAP!
-                    else:
-                        j += 1
+            self._overlap_handler()
 
         out = ""
         for i, line in enumerate(self._screen):
@@ -150,7 +154,7 @@ class Output:
 
                 # check for color
                 if obj["color"]:
-                    out += Output.get_color(obj["color"])
+                    out += Output._get_color(obj["color"])
                 else:
                     # reset color
                     out += "\033[39m"
