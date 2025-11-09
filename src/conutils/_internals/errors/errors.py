@@ -13,7 +13,7 @@ def ethrow(key: str, error_code: str) -> NoReturn:
         errors = json.load(json_file)
 
     raise ConUtils_error(
-        f"\033[1;31m{key}\033[22;39m\n\033[39m{errors[key][error_code]}\033[39m")
+        f"\033[1;31m{key} ~ {error_code}\033[22;39m\n\033[39m{errors[key][error_code]}\033[39m")
 
 
 class ConUtils_error(Exception):

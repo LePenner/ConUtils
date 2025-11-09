@@ -1,11 +1,13 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, Callable, Any, Protocol, cast
+import multiprocessing as mp
+import __main__
 
 if TYPE_CHECKING:
     from ..entity.elements import Element
     from ..console import Console
 
-#             screen>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
+# screen>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
 
 
 class ObjDict(TypedDict):
@@ -19,12 +21,31 @@ line_type = list[ObjDict]
 screen_type = list[line_type]
 
 
+class LockProtocol(Protocol):
+    def acquire(self, blocking: bool = True, timeout: float = -1) -> bool: ...
+    def release(self) -> None: ...
+    def locked(self) -> bool: ...
+
+
+class QueueProtocol(Protocol):
+    def put(self, item: Any) -> None: ...
+    def get(self) -> Any: ...
+    def get_nowait(self) -> Any: ...
+
+
 class Output:
 
-    def __init__(self, console: Console):
+    def __init__(self, console: Console, processes: int):
 
-        self.console = console
+        self._console = console
+        manager = mp.Manager()
+        self._queue: QueueProtocol | None = manager.Queue()
+        self._pool = mp.Pool(processes) if processes > 0 else None
+        self._line_locks: list[LockProtocol] = [manager.Lock()
+                                                for _ in range(self._console.height)]
         self.clear()
+
+        self.stop_processor = False
 
     @staticmethod
     def _get_color(color: tuple[int, int, int] | None):
@@ -35,10 +56,10 @@ class Output:
             return "\033[39;49m"
 
     @staticmethod
-    def _binsert_algo(obj: Element, lst: line_type) -> int:
+    def _binsert_algo(obj: ObjDict, lst: line_type) -> int:
         """Searches for index recursively."""
 
-        x = obj.x_abs
+        x = obj["pos"]
         piv = len(lst)//2
 
         if len(lst) > 1:
@@ -54,6 +75,13 @@ class Output:
                 return 0
         else:
             return 0
+
+    def _add_processor(self, obj: ObjDict, line: line_type):
+
+        index = self._binsert_algo(obj, line)
+
+        line.insert(
+            index, obj)
 
     def _overlap_handler(self):
 
@@ -113,8 +141,44 @@ class Output:
                 else:
                     j += 1
 
+    def _add_multiprocessing(self):
+
+        while not self.stop_processor:
+            if not self._queue:
+                raise RuntimeError
+
+            try:
+                obj, index = cast(
+                    tuple[ObjDict, int], self._queue.get_nowait())
+            except:
+                return
+
+            lock = self._line_locks[index]
+
+            if not lock.locked():
+                lock.acquire()
+                line = self._screen[obj["pos"] + index]
+                self._add_processor(obj, line)
+                lock.release()
+            else:
+                self._queue.put((obj, index))
+
+    @property
+    def pool(self):
+        return self._pool
+
+    def start_processor(self):
+        self.stop_processor = False
+        self.pool_work(self._add_multiprocessing)
+
+    def pool_work(self, f: Callable[..., Any], *args: Any):
+        if not self._pool:
+            raise RuntimeError
+
+        return self._pool.apply_async(f, *args)
+
     def clear(self):
-        self._screen: screen_type = [[] for _ in range(self.console.height)]
+        self._screen: screen_type = [[] for _ in range(self._console.height)]
 
     def add(self, element: Element):
         """Add an Element to a line in screen.
@@ -124,24 +188,27 @@ class Output:
 
         for i, rep in enumerate(element.representation):
 
-            line = self._screen[element.y_abs+i]
-            index = self._binsert_algo(element, line)
+            obj: ObjDict = {"pos": element.x_abs,
+                            "rep": rep,
+                            "format": (element.bold, element.italic, element.strike_through),
+                            "color": element.display_rgb}
 
-            line.insert(
-                index, {"pos": element.x_abs,
-                        "rep": rep,
-                        "format": (element.bold, element.italic, element.strike_through),
-                        "color": element.display_rgb})
+            if self._pool and self._queue:
+                # for multiprocessing
+                self._queue.put((obj, i))
+            else:
+                line = self._screen[element.y_abs+i]
+                self._add_processor(obj, line)
 
     def compile(self):
-        if self.console.overlap == True:
+        if self._console.overlap == True:
             self._overlap_handler()
 
         out = ""
         for i, line in enumerate(self._screen):
             # fill line with spaces if empty
             if len(line) == 0:
-                out += " "*self.console.width
+                out += " "*self._console.width
 
             for j, obj in enumerate(line):
                 if j > 0:
@@ -165,7 +232,7 @@ class Output:
                 # if last object in line:
                 if len(line) == j+1:
                     # fill rest of line with spaces
-                    out += " "*(self.console.width -
+                    out += " "*(self._console.width -
                                 obj["pos"] - len(obj["rep"]))
 
             # add new line at end of line

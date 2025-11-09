@@ -2,12 +2,13 @@ import __main__
 import os
 import asyncio
 import time
+from multiprocessing import cpu_count, freeze_support, current_process
 from typing import Unpack
 from .entity.elements import Element
 from .entity.container import Container
-# from .entity.elements import Animated
 from .toolkit.screen_compiler import Output
 from .entity.entity import EntityKwargs
+from .errors import ethrow
 
 
 class Console(Container):
@@ -16,24 +17,37 @@ class Console(Container):
     define an `update` function to configure runtime behavior.
     """
 
+    _instance = None
+
     def __init__(self,
                  overlap: bool = False,
                  fps: int = 0,
+                 multiprocessing: bool | int = False,
                  **kwargs: Unpack[EntityKwargs]):
         self._stop_flag = False
         self.fps = fps
+
+        if multiprocessing == True:
+            multiprocessing = cpu_count()
+        elif multiprocessing != False:
+            if multiprocessing > cpu_count():
+                ethrow("CONS", "too many processes")
+
+        self._processes = multiprocessing
 
         # set default length and height to terminal
         kwargs["width"] = kwargs.get("width") or\
             os.get_terminal_size()[0]
         kwargs["height"] = kwargs.get("height") or\
-            kwargs.get("height", os.get_terminal_size()[1])
+            os.get_terminal_size()[1]
 
         super().__init__(overlap=overlap, **kwargs)
 
-        self._otp = Output(self)
-
     def _cleanup(self):
+
+        if self._otp.pool:
+            self._otp.pool.terminate()
+
         self.show_cursor()
         self.clear_console()
         self.reset_format()
@@ -64,9 +78,15 @@ class Console(Container):
         self._stop_flag = True
 
     def run(self):
+
+        freeze_support()
+        if current_process().name != "MainProcess":
+            return
+
+        self._otp = Output(self, self._processes)
         self.clear_console()
         self.hide_cursor()
-        print("\033[s", end="")
+
         try:
             self._run_async()
             self._cleanup()
@@ -105,8 +125,12 @@ class Console(Container):
                 self.calc(children)
 
     def calc(self, children: list[Element]):
+        if self._processes:
+            self._otp.start_processor()
+
         for child in children:
             self._otp.add(child)
+        self._otp.stop_processor = True
 
         print(self._otp.compile(), end="\r")
         self._otp.clear()
