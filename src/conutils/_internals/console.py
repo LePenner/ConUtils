@@ -2,7 +2,7 @@ import __main__
 import os
 import asyncio
 import time
-from multiprocessing import cpu_count, freeze_support, current_process
+from multiprocessing import cpu_count, freeze_support, current_process, set_start_method
 from typing import Unpack
 from .entity.elements import Element
 from .entity.container import Container
@@ -45,9 +45,6 @@ class Console(Container):
 
     def _cleanup(self):
 
-        if self._otp.pool:
-            self._otp.pool.terminate()
-
         self.show_cursor()
         self.clear_console()
         self.reset_format()
@@ -83,6 +80,7 @@ class Console(Container):
         if current_process().name != "MainProcess":
             return
 
+        set_start_method("spawn", force=True)
         self._otp = Output(self, self._processes)
         self.clear_console()
         self.hide_cursor()
@@ -113,6 +111,9 @@ class Console(Container):
 
         while self._stop_flag == False:
 
+            with open(f"out.txt", "a") as f:
+                f.write("\n"*10)
+
             # lets user add custom functionality on runtime
             # checks for function update() in main file
             if getattr(__main__, "update", None):
@@ -125,12 +126,15 @@ class Console(Container):
                 self.calc(children)
 
     def calc(self, children: list[Element]):
-        if self._processes:
-            self._otp.start_processor()
+
+        if self._otp.processor:
+            self._otp.processor.start_processor()
 
         for child in children:
             self._otp.add(child)
-        self._otp.stop_processor = True
+
+        if self._otp.processor:
+            self._otp.processor.end_processor()
 
         print(self._otp.compile(), end="\r")
         self._otp.clear()

@@ -33,19 +33,110 @@ class QueueProtocol(Protocol):
     def get_nowait(self) -> Any: ...
 
 
+class ValueProtocol(Protocol):
+    @property
+    def value(self) -> bool: ...
+    @value.setter
+    def value(self) -> None: ...
+
+
+class PlateType(TypedDict):
+    queue: QueueProtocol
+    locks: list[LockProtocol]
+    stop: ValueProtocol
+
+
+class MultiProcessing:
+    def __init__(self, otp: Output, processes: int, add_processor: Callable[[ObjDict, line_type], line_type]) -> None:
+        manager = mp.Manager()
+        self._manager = manager
+        self._otp = otp
+        self._add_processor = add_processor
+        self._screen = manager.list()
+        self._queue = manager.Queue()
+        self._pool = mp.Pool(processes)
+        self._line_locks = [manager.Lock() for _ in range(otp.console.height)]
+        self._stop_flag = manager.Value("b", False)
+        self._plate = cast(PlateType, {"queue": self._queue,
+                                       "locks": self._line_locks,
+                                       "stop": self._stop_flag})
+
+    @staticmethod
+    def _add_multiprocessing(q: QueueProtocol,
+                             locks: list[LockProtocol],
+                             stop: ValueProtocol,
+                             add_processor: Callable[[ObjDict, line_type], line_type],
+                             screen: screen_type):
+
+        while not stop.value:
+
+            try:
+                obj, index = cast(
+                    tuple[ObjDict, int], q.get_nowait())
+
+            except:
+                # no object in queue
+                return
+
+            lock = locks[index]
+
+            if lock.acquire(blocking=False):
+                try:
+                    screen[index] = add_processor(obj, screen[index])
+
+                finally:
+                    lock.release()
+            else:
+                q.put((obj, index))
+
+    @property
+    def pool(self):
+        return self._pool
+
+    @property
+    def queue(self):
+        return self._queue
+
+    @property
+    def plate(self):
+        return self._plate
+
+    @property
+    def screen(self):
+        return self._screen
+
+    def start_processor(self):
+        p = self._plate
+        self._screen = self._manager.list(
+            [self._manager.list(line) for line in self._otp.screen]
+        )
+        self._stop_flag = False
+        self._process = self.pool_work(self._add_multiprocessing,
+                                       p["queue"], p["locks"], p["stop"], self._add_processor, self._screen)
+
+    def end_processor(self):
+        self._stop_flag = True
+        self._process.wait()
+
+    def pool_work(self, f: Callable[..., Any], *args: Any):
+        if not self._pool:
+            raise RuntimeError
+
+        return self._pool.apply_async(f, args)
+
+
 class Output:
 
     def __init__(self, console: Console, processes: int):
 
         self._console = console
-        manager = mp.Manager()
-        self._queue: QueueProtocol | None = manager.Queue()
-        self._pool = mp.Pool(processes) if processes > 0 else None
-        self._line_locks: list[LockProtocol] = [manager.Lock()
-                                                for _ in range(self._console.height)]
-        self.clear()
+        self.clear()  # initilazes self._screen
 
-        self.stop_processor = False
+        if processes:
+            self._processor = MultiProcessing(
+                self, processes, self._add_processor)
+        else:
+            self._processor = None
 
     @staticmethod
     def _get_color(color: tuple[int, int, int] | None):
@@ -76,12 +167,15 @@ class Output:
         else:
             return 0
 
-    def _add_processor(self, obj: ObjDict, line: line_type):
+    @staticmethod
+    def _add_processor(obj: ObjDict, line: line_type):
 
-        index = self._binsert_algo(obj, line)
+        index = Output._binsert_algo(obj, line)
 
         line.insert(
             index, obj)
+
+        return line
 
     def _overlap_handler(self):
 
@@ -141,41 +235,17 @@ class Output:
                 else:
                     j += 1
 
-    def _add_multiprocessing(self):
-
-        while not self.stop_processor:
-            if not self._queue:
-                raise RuntimeError
-
-            try:
-                obj, index = cast(
-                    tuple[ObjDict, int], self._queue.get_nowait())
-            except:
-                return
-
-            lock = self._line_locks[index]
-
-            if not lock.locked():
-                lock.acquire()
-                line = self._screen[obj["pos"] + index]
-                self._add_processor(obj, line)
-                lock.release()
-            else:
-                self._queue.put((obj, index))
+    @property
+    def console(self):
+        return self._console
 
     @property
-    def pool(self):
-        return self._pool
+    def screen(self):
+        return self._screen
 
-    def start_processor(self):
-        self.stop_processor = False
-        self.pool_work(self._add_multiprocessing)
-
-    def pool_work(self, f: Callable[..., Any], *args: Any):
-        if not self._pool:
-            raise RuntimeError
-
-        return self._pool.apply_async(f, *args)
+    @property
+    def processor(self):
+        return self._processor
 
     def clear(self):
         self._screen: screen_type = [[] for _ in range(self._console.height)]
@@ -192,15 +262,20 @@ class Output:
                             "rep": rep,
                             "format": (element.bold, element.italic, element.strike_through),
                             "color": element.display_rgb}
+            index = element.y_abs+i
+            line = self._screen[index]
 
-            if self._pool and self._queue:
+            if self._processor:
                 # for multiprocessing
-                self._queue.put((obj, i))
+                self._processor.queue.put((obj, index))
             else:
-                line = self._screen[element.y_abs+i]
-                self._add_processor(obj, line)
+                self._screen[index] = self._add_processor(obj, line)
 
     def compile(self):
+        if self._processor:
+            self._screen = [
+                list(line) for line in self._processor.screen]
+
         if self._console.overlap == True:
             self._overlap_handler()
 
