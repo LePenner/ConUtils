@@ -29,8 +29,8 @@ class LockProtocol(Protocol):
 
 class QueueProtocol(Protocol):
     def put(self, item: Any) -> None: ...
-    def get(self) -> Any: ...
     def get_nowait(self) -> Any: ...
+    def task_done(self) -> None: ...
 
 
 class ValueProtocol(Protocol):
@@ -86,8 +86,13 @@ class MultiProcessing:
 
                 finally:
                     lock.release()
+                    q.task_done()
             else:
                 q.put((obj, index))
+
+    @property
+    def manager(self):
+        return self._manager
 
     @property
     def pool(self):
@@ -110,12 +115,13 @@ class MultiProcessing:
         self._screen = self._manager.list(
             [self._manager.list(line) for line in self._otp.screen]
         )
-        self._stop_flag = False
+        self._stop_flag.value = False
         self._process = self.pool_work(self._add_multiprocessing,
                                        p["queue"], p["locks"], p["stop"], self._add_processor, self._screen)
 
     def end_processor(self):
-        self._stop_flag = True
+        self._queue.join()
+        self._stop_flag.value = True
         self._process.wait()
 
     def pool_work(self, f: Callable[..., Any], *args: Any):

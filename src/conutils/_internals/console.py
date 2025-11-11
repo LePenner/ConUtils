@@ -45,6 +45,12 @@ class Console(Container):
 
     def _cleanup(self):
 
+        if self._otp.processor:
+            # self._otp.processor.manager.shutdown()
+            self._otp.processor.pool.terminate()
+            self._otp.processor.pool.join()
+            self._otp.processor.end_processor()
+
         self.show_cursor()
         self.clear_console()
         self.reset_format()
@@ -110,9 +116,6 @@ class Console(Container):
         tick = tick_generator()
 
         while self._stop_flag == False:
-
-            with open(f"out.txt", "a") as f:
-                f.write("\n"*10)
 
             # lets user add custom functionality on runtime
             # checks for function update() in main file
