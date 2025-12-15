@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "ConUtils"
 version = "0.0.8b"
-authors = [{ name = "Kira", email = "monoclecatstudio@gmail.com" }]
+authors = [{ name = "Kira", email = "meow@monoclecat-studios.de" }]
 description = "a collection of console output fomating methods"
 readme = "README.md"
 requires-python = ">=3.11"

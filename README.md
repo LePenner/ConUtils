@@ -10,6 +10,6 @@ Terminal needs ANSI support! - *duh*
 - add Frame class for containers
 - input system
 
-## destribution
+## distribution
 
 - ```pip install ConUtils```

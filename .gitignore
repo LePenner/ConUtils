@@ -1,8 +1,7 @@
 .vscode/
 dist/
 __pycache__/
-test.py
 test.json
-.test.py
+test.py
 .vscode/
 playground/
