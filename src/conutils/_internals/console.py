@@ -6,7 +6,7 @@ from multiprocessing import cpu_count, freeze_support, current_process, set_star
 from typing import Unpack
 from .entity.elements import Element
 from .entity.container import Container
-from .toolkit.screen_compiler import Output
+from .toolkit.compiler.compiler_core import Output
 from .entity.entity import EntityKwargs
 from .errors import ethrow
 
@@ -14,7 +14,7 @@ from .errors import ethrow
 class Console(Container):
     """Console handles the output of any child screens and lines to the terminal.
 
-    define an `update` function to configure runtime behavior.
+    Define an `update` function to configure runtime behavior.
     """
 
     _instance = None
@@ -44,12 +44,6 @@ class Console(Container):
         super().__init__(overlap=overlap, **kwargs)
 
     def _cleanup(self):
-
-        if self._otp.processor:
-            # self._otp.processor.manager.shutdown()
-            self._otp.processor.pool.terminate()
-            self._otp.processor.pool.join()
-            self._otp.processor.end_processor()
 
         self.show_cursor()
         self.clear_console()
@@ -92,12 +86,12 @@ class Console(Container):
         self.hide_cursor()
 
         try:
-            self._run_async()
+            asyncio.run(self._run_async())
             self._cleanup()
         except KeyboardInterrupt:
             self._cleanup()
 
-    def _run_async(self):
+    async def _run_async(self):
 
         children = self._collect_children()
 
@@ -123,21 +117,14 @@ class Console(Container):
                 __main__.update()  # type:  ignore
 
             if self.fps:
-                self.calc(children)
                 time.sleep(next(tick))
-            else:
-                self.calc(children)
+
+            self.calc(children)
 
     def calc(self, children: list[Element]):
 
-        if self._otp.processor:
-            self._otp.processor.start_processor()
-
         for child in children:
-            self._otp.add(child)
+            self._otp.collect(child)
 
-        if self._otp.processor:
-            self._otp.processor.end_processor()
-
-        print(self._otp.compile(), end="\r")
+        print(self._otp, end="\r")
         self._otp.clear()

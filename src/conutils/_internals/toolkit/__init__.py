@@ -1,4 +1,4 @@
 from .color import Color
-from .screen_compiler import Output
+from .compiler.compiler_core import Output
 
 __all__ = ["Color", "Output"]
