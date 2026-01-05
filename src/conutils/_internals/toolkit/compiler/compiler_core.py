@@ -21,46 +21,36 @@ screen_type = list[line_type]
 
 
 class PreComp:
-    def __init__(self, output: Output) -> None:
-        self._otp = output
+    def __init__(self, Frame: Frame) -> None:
+        self._otp = Frame
 
     @staticmethod
-    def _binsert_algo(obj: ObjDict, lst: line_type) -> int:
-        """Searches for index recursively."""
-
+    def _binsert_index(obj: ObjDict, line: line_type) -> int:
         x = obj["pos"]
-        piv = len(lst)//2
+        lo = 0
+        hi = len(line)
 
-        if len(lst) > 1:
-
-            if x > lst[piv]["pos"]:
-                return piv+PreComp._binsert_algo(obj, lst[piv:])+1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if line[mid]["pos"] < x:
+                lo = mid + 1
             else:
-                return PreComp._binsert_algo(obj, lst[:piv])
-        elif len(lst) == 1:
-            if x > lst[piv]["pos"]:
-                return 1
-            else:
-                return 0
-        else:
-            return 0
+                hi = mid
 
-    def to_screen(self, screen_index: int, obj: ObjDict, line: line_type):
+        return lo
+
+    def to_screen(self, obj: ObjDict, line: line_type):
         """Places """
 
-        line_index = PreComp._binsert_algo(obj, line)
+        line_index = PreComp._binsert_index(obj, line)
 
         line.insert(
             line_index, obj)
 
-        self._otp.screen[screen_index] = line
-
 
 class Comp:
-    def __init__(self, output: Output) -> None:
-        self._otp = output
-        self._screen = output.screen
-        self._console = output.console
+    def __init__(self, Frame: Frame) -> None:
+        self._otp = Frame
 
     @staticmethod
     def _get_color(color: tuple[int, int, int] | None):
@@ -72,11 +62,15 @@ class Comp:
 
     @property
     def screen(self):
-        return self._screen
+        return self._otp.screen
+
+    @property
+    def console(self):
+        return self._otp.console
 
     def _overlap_handler(self):
 
-        for line in self._screen:
+        for line in self.screen:
 
             # j as line index
             j: int = 1
@@ -143,10 +137,10 @@ class Comp:
 
         out = ""
         #
-        for i, line in enumerate(self._screen):
+        for i, line in enumerate(self.screen):
             # fill line with spaces if empty
             if len(line) == 0:
-                out += " "*self._console.width
+                out += " "*self.console.width
 
             for j, obj in enumerate(line):
                 if j > 0:
@@ -170,11 +164,11 @@ class Comp:
                 # if last object in line:
                 if len(line) == j+1:
                     # fill rest of line with spaces
-                    out += " "*(self._console.width -
+                    out += " "*(self.console.width -
                                 obj["pos"] - len(obj["rep"]))
 
             # add new line at end of line
-            if len(self._screen) != i+1:
+            if len(self.screen) != i+1:
                 out += "\n"
             # if last line: return to top left
             else:
@@ -182,7 +176,7 @@ class Comp:
         return out
 
 
-class Output:
+class Frame:
 
     def __init__(self, console: Console, processes: int):
 
@@ -192,17 +186,6 @@ class Output:
         self._comp = Comp(self)
         self._precomp = PreComp(self)
 
-    def __str__(self):
-        return self._comp.compile()
-
-    @staticmethod
-    def _get_color(color: tuple[int, int, int] | None):
-        if color:
-            r, g, b = color
-            return f"\033[38;2;{r};{g};{b}m"
-        else:
-            return "\033[39;49m"
-
     @property
     def console(self):
         return self._console
@@ -211,8 +194,9 @@ class Output:
     def screen(self):
         return self._screen
 
-    def clear(self):
-        self._screen: screen_type = [[] for _ in range(self._console.height)]
+    def compile(self):
+        out = self._comp.compile()
+        return out
 
     def collect(self, element: Element):
         """Add an Element to a `line` in `_screen`.
@@ -235,4 +219,5 @@ class Output:
                 # for multiprocessing
                 self._processor.queue.put((obj, index))
             else:'''
-            self._precomp.to_screen(index, obj, line)
+
+            self._precomp.to_screen(obj, line)

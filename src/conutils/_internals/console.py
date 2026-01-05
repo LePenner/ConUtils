@@ -4,9 +4,9 @@ import asyncio
 import time
 from multiprocessing import cpu_count, freeze_support, current_process, set_start_method
 from typing import Unpack
-from .entity.elements import Element
+from .entity.elements import Animated
 from .entity.container import Container
-from .toolkit.compiler.compiler_core import Output
+from .toolkit.compiler.compiler_core import Frame
 from .entity.entity import EntityKwargs
 from .errors import ethrow
 
@@ -15,6 +15,8 @@ class Console(Container):
     """Console handles the output of any child screens and lines to the terminal.
 
     Define an `update` function to configure runtime behavior.
+
+    Setting `debug` to `True` will disable the console output.
     """
 
     _instance = None
@@ -23,6 +25,7 @@ class Console(Container):
                  overlap: bool = False,
                  fps: int = 0,
                  multiprocessing: bool | int = False,
+                 debug: bool = False,
                  **kwargs: Unpack[EntityKwargs]):
         self._stop_flag = False
         self.fps = fps
@@ -34,6 +37,7 @@ class Console(Container):
                 ethrow("CONS", "too many processes")
 
         self._processes = multiprocessing
+        self.debug = debug
 
         # set default length and height to terminal
         kwargs["width"] = kwargs.get("width") or\
@@ -81,7 +85,6 @@ class Console(Container):
             return
 
         set_start_method("spawn", force=True)
-        self._otp = Output(self, self._processes)
         self.clear_console()
         self.hide_cursor()
 
@@ -97,11 +100,12 @@ class Console(Container):
 
         # start all animation loops
         for child in children:
-            if hasattr(child, "_animation_loop"):
+            if isinstance(child, Animated):
                 # _animation_loop() is protected
                 asyncio.create_task(child._animation_loop())  # type: ignore
 
-        # avg error of about -0.5 ms
+        # prpobably hogging the whole scheduler
+        # avg error of about 0.5 ms
         def tick_generator():
             t = time.perf_counter()
             while True:
@@ -116,15 +120,13 @@ class Console(Container):
             if getattr(__main__, "update", None):
                 __main__.update()  # type:  ignore
 
+            frame = Frame(self, self._processes)
+
             if self.fps:
-                time.sleep(next(tick))
+                await asyncio.sleep(next(tick))
 
-            self.calc(children)
+            for child in children:
+                frame.collect(child)
 
-    def calc(self, children: list[Element]):
-
-        for child in children:
-            self._otp.collect(child)
-
-        print(self._otp, end="\r")
-        self._otp.clear()
+            if not self.debug:
+                print(frame.compile(), end="\r")
