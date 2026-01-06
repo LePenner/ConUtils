@@ -7,11 +7,9 @@ Terminal needs ANSI support! - *duh*
 
 ## to-do:
 
-- DynamicTextelements
-
-- implement multi line spinners/animations
 - add Frame class for containers
+- input system
 
-## destribution
+## distribution
 
 - ```pip install ConUtils```
