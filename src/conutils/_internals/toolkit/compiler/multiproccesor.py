@@ -1,24 +1,11 @@
-
-class LockProtocol(Protocol):
-    def acquire(self, blocking: bool = True, timeout: float = -1) -> bool: ...
-    def release(self) -> None: ...
-    def locked(self) -> bool: ...
+from .commons import ObjDict, frame_type, line_type
 
 
-class QueueProtocol(Protocol):
-    def put(self, item: Any) -> None: ...
-    def get_nowait(self) -> Any: ...
-    def task_done(self) -> None: ...
+class Mp_collector():
+    def __init__(self, cores: int, frame: frame_type):
+        self._mp_frame = frame
+        self._mp_collect = self._mp_frame.copy()
+        self._cores = cores
 
-
-class ValueProtocol(Protocol):
-    @property
-    def value(self) -> bool: ...
-    @value.setter
-    def value(self) -> None: ...
-
-
-class PlateType(TypedDict):
-    queue: QueueProtocol
-    locks: list[LockProtocol]
-    stop: ValueProtocol
+    def submit(self, obj: ObjDict, line_index: int):
+        self._mp_collect[line_index].append(obj)

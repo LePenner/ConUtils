@@ -2,6 +2,7 @@ import __main__
 import os
 import asyncio
 import time
+import datetime
 from multiprocessing import cpu_count, freeze_support, current_process, set_start_method
 from typing import Unpack
 from .entity.elements import Animated
@@ -115,18 +116,25 @@ class Console(Container):
 
         while self._stop_flag == False:
 
+            time_tracker = time.perf_counter()
+
             # lets user add custom functionality on runtime
             # checks for function update() in main file
             if getattr(__main__, "update", None):
                 __main__.update()  # type:  ignore
 
-            frame = Frame(self, self._processes)
-
             if self.fps:
                 await asyncio.sleep(next(tick))
+
+            frame = Frame(self, self._processes)
 
             for child in children:
                 frame.collect(child)
 
             if not self.debug:
                 print(frame.compile(), end="\r")
+            else:
+                with open("out.txt", "a") as f:
+                    time_passed = time.perf_counter() - time_tracker
+                    f.write(
+                        f"[{datetime.datetime.now()}] frametime: {time_passed*1000:.2f} ms || {1/time_passed:.2f} fps\n")

@@ -1,24 +1,15 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING
 import __main__
-from errors import ethrow
+from ...errors import ethrow
+from .commons import ObjDict, frame_type, line_type
+from .multiproccesor import Mp_collector
 
 if TYPE_CHECKING:
     from ...entity.elements import Element
     from ...console import Console
 
 # frame>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
-
-
-class ObjDict(TypedDict):
-    pos: int
-    rep: str
-    format: tuple[bool, bool, bool]
-    color: tuple[int, int, int] | None
-
-
-line_type = list[ObjDict]
-frame_type = list[line_type]
 
 
 class PreComp:
@@ -52,63 +43,61 @@ class Comp:
     """Contains all logic to compile `Frame`."""
 
     @staticmethod
-    def _overlap_handler(frame: frame_type):
+    def _overlap_handler(line: line_type):
 
-        for line in frame:
+        # j as line index
+        j: int = 1
+        while True:
 
-            # j as line index
-            j: int = 1
-            while True:
+            if len(line) <= j:
+                break
 
-                if len(line) <= j:
-                    break
+            # previous object in list
+            prev_obj = line[j-1]
+            prev_obj_pos = prev_obj["pos"]
+            prev_obj_width = len(prev_obj["rep"])
 
-                # previous object in list
-                prev_obj = line[j-1]
-                prev_obj_pos = prev_obj["pos"]
-                prev_obj_width = len(prev_obj["rep"])
+            # point of reference
+            obj = line[j]
+            obj_pos = obj["pos"]
+            obj_width = len(obj["rep"])
 
-                # point of reference
-                obj = line[j]
-                obj_pos = obj["pos"]
-                obj_width = len(obj["rep"])
+            # check objects for overlap
+            if prev_obj_pos <= obj_pos + obj_width and \
+                    prev_obj_pos + prev_obj_width >= obj_pos:
 
-                # check objects for overlap
-                if prev_obj_pos <= obj_pos + obj_width and \
-                        prev_obj_pos + prev_obj_width >= obj_pos:
+                split: ObjDict = {
+                    "pos": prev_obj_pos,
+                    "rep": "",
+                    "format": prev_obj["format"],
+                    "color": prev_obj["color"]
+                }
 
-                    split: ObjDict = {
-                        "pos": prev_obj_pos,
-                        "rep": "",
-                        "format": prev_obj["format"],
-                        "color": prev_obj["color"]
-                    }
+                # remove prev_obj from line
+                line.pop(j-1)
 
-                    # remove prev_obj from line
-                    line.pop(j-1)
-
-                    # calculate left side of split
-                    # how much is visible
-                    if prev_obj_pos < obj_pos:
-                        l_split = split.copy()
-                        l_split["rep"] = prev_obj["rep"][:obj_pos - prev_obj_pos]
-                        line.insert(j-1, l_split)
-                        # increment j because we added an element to the left
-                        j += 1
-
-                    # calculate right side of split
-                    # how much is visible
-                    if prev_obj_pos + prev_obj_width > obj_pos + obj_width:
-                        r_split = split.copy()
-                        r_split["rep"] = prev_obj["rep"][(
-                            obj_pos + obj_width) - prev_obj_pos:]
-                        r_split["pos"] += obj_width
-                        line.insert(j+1, r_split)
-
-                # if objects dont overlap go to next object
-                # Note: WE DO NOT INCREMENT IF THERE IS OVERLAP!
-                else:
+                # calculate left side of split
+                # how much is visible
+                if prev_obj_pos < obj_pos:
+                    l_split = split.copy()
+                    l_split["rep"] = prev_obj["rep"][:obj_pos - prev_obj_pos]
+                    line.insert(j-1, l_split)
+                    # increment j because we added an element to the left
                     j += 1
+
+                # calculate right side of split
+                # how much is visible
+                if prev_obj_pos + prev_obj_width > obj_pos + obj_width:
+                    r_split = split.copy()
+                    r_split["rep"] = prev_obj["rep"][(
+                        obj_pos + obj_width) - prev_obj_pos:]
+                    r_split["pos"] += obj_width
+                    line.insert(j+1, r_split)
+
+            # if objects dont overlap go to next object
+            # Note: WE DO NOT INCREMENT IF THERE IS OVERLAP!
+            else:
+                j += 1
 
     @staticmethod
     def _get_color(color: tuple[int, int, int] | None):
@@ -125,16 +114,14 @@ class Comp:
         The objects in a frame are converted and formated accordingly. The frame is processed on a per line basis.
         """
 
-        if console.overlap == True:
-            Comp._overlap_handler(frame)
-
         out = ""
-        #
+
         for i, line in enumerate(frame):
             # fill line with spaces if empty
             if len(line) == 0:
                 out += " "*console.width
-                continue
+
+            Comp._overlap_handler(line)
 
             for j, obj in enumerate(line):
                 if j > 0:
@@ -167,6 +154,7 @@ class Comp:
             # if last line: return to top left
             else:
                 out += "\033[u"
+
         return out
 
 
@@ -180,10 +168,17 @@ class Frame:
     Frame is consumed after compilation.
     """
 
-    def __init__(self, console: Console, processes: int):
+    def __init__(self, console: Console, mp_cores: int):
 
         self._console = console
         self._frame: frame_type = [[] for _ in range(self._console.height)]
+
+        # multiprocessing enabled
+        if mp_cores:
+            self._mp_collector = Mp_collector(mp_cores, self._frame.copy())
+        else:
+            self._mp_collector = None
+
         self._cached_frame: str | None = None
 
     def get_cached(self):
@@ -216,10 +211,8 @@ class Frame:
             index = element.y_abs+i
             line = self._frame[index]
 
-            '''
-            if self._processor:
-                # for multiprocessing
-                self._processor.queue.put((obj, index))
-            else:'''
+            if self._mp_collector:
+                self._mp_collector.submit(obj, index)
 
-            PreComp.to_frame(obj, line)
+            else:
+                PreComp.to_frame(obj, line)
