@@ -1,12 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict
 import __main__
+from errors import ethrow
 
 if TYPE_CHECKING:
     from ...entity.elements import Element
     from ...console import Console
 
-# screen>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
+# frame>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
 
 
 class ObjDict(TypedDict):
@@ -17,12 +18,10 @@ class ObjDict(TypedDict):
 
 
 line_type = list[ObjDict]
-screen_type = list[line_type]
+frame_type = list[line_type]
 
 
 class PreComp:
-    def __init__(self, Frame: Frame) -> None:
-        self._otp = Frame
 
     @staticmethod
     def _binsert_index(obj: ObjDict, line: line_type) -> int:
@@ -39,8 +38,9 @@ class PreComp:
 
         return lo
 
-    def to_screen(self, obj: ObjDict, line: line_type):
-        """Places """
+    @staticmethod
+    def to_frame(obj: ObjDict, line: line_type):
+        """Calculates position for `obj` and places it in its location."""
 
         line_index = PreComp._binsert_index(obj, line)
 
@@ -49,28 +49,12 @@ class PreComp:
 
 
 class Comp:
-    def __init__(self, Frame: Frame) -> None:
-        self._otp = Frame
+    """Contains all logic to compile `Frame`."""
 
     @staticmethod
-    def _get_color(color: tuple[int, int, int] | None):
-        if color:
-            r, g, b = color
-            return f"\033[38;2;{r};{g};{b}m"
-        else:
-            return "\033[39;49m"
+    def _overlap_handler(frame: frame_type):
 
-    @property
-    def screen(self):
-        return self._otp.screen
-
-    @property
-    def console(self):
-        return self._otp.console
-
-    def _overlap_handler(self):
-
-        for line in self.screen:
+        for line in frame:
 
             # j as line index
             j: int = 1
@@ -126,21 +110,31 @@ class Comp:
                 else:
                     j += 1
 
-    def compile(self):
+    @staticmethod
+    def _get_color(color: tuple[int, int, int] | None):
+        if color:
+            r, g, b = color
+            return f"\033[38;2;{r};{g};{b}m"
+        else:
+            return "\033[39;49m"
+
+    @staticmethod
+    def compile(frame: frame_type, console: Console):
         """Converts the gathered objects into a single string.
 
-        The objects in `_screen` are converted and formated accordingly. `_screen` is processed on a per line basis.
+        The objects in a frame are converted and formated accordingly. The frame is processed on a per line basis.
         """
 
-        if self._otp.console.overlap == True:
-            self._overlap_handler()
+        if console.overlap == True:
+            Comp._overlap_handler(frame)
 
         out = ""
         #
-        for i, line in enumerate(self.screen):
+        for i, line in enumerate(frame):
             # fill line with spaces if empty
             if len(line) == 0:
-                out += " "*self.console.width
+                out += " "*console.width
+                continue
 
             for j, obj in enumerate(line):
                 if j > 0:
@@ -164,11 +158,11 @@ class Comp:
                 # if last object in line:
                 if len(line) == j+1:
                     # fill rest of line with spaces
-                    out += " "*(self.console.width -
+                    out += " "*(console.width -
                                 obj["pos"] - len(obj["rep"]))
 
             # add new line at end of line
-            if len(self.screen) != i+1:
+            if len(frame) != i+1:
                 out += "\n"
             # if last line: return to top left
             else:
@@ -177,29 +171,37 @@ class Comp:
 
 
 class Frame:
+    """Holds a frame to be operated on.
+
+        Collected elements are placed onto the Frame.
+        Frame can be compiled after. 
+
+    Uses one instance each frame.
+    Frame is consumed after compilation.
+    """
 
     def __init__(self, console: Console, processes: int):
 
         self._console = console
-        self._screen: screen_type = [[] for _ in range(self._console.height)]
+        self._frame: frame_type = [[] for _ in range(self._console.height)]
+        self._cached_frame: str | None = None
 
-        self._comp = Comp(self)
-        self._precomp = PreComp(self)
-
-    @property
-    def console(self):
-        return self._console
-
-    @property
-    def screen(self):
-        return self._screen
+    def get_cached(self):
+        if self._cached_frame:
+            return self._cached_frame
+        else:
+            ethrow("COMP", "not compiled")
 
     def compile(self):
-        out = self._comp.compile()
-        return out
+        if not self._cached_frame:
+            out = Comp.compile(self._frame, self._console)
+            self._cached_frame = out
+            return out
+        else:
+            ethrow("COMP", "cached frame")
 
     def collect(self, element: Element):
-        """Add an Element to a `line` in `_screen`.
+        """Add an Element to a `line` in `_frame`.
 
         For every line of an elements representation, insert it into the right spot of the line.
         Contains logic to handle single/multiprocessing.
@@ -212,7 +214,7 @@ class Frame:
                             "format": (element.bold, element.italic, element.strike_through),
                             "color": element.display_rgb}
             index = element.y_abs+i
-            line = self._screen[index]
+            line = self._frame[index]
 
             '''
             if self._processor:
@@ -220,4 +222,4 @@ class Frame:
                 self._processor.queue.put((obj, index))
             else:'''
 
-            self._precomp.to_screen(obj, line)
+            PreComp.to_frame(obj, line)
