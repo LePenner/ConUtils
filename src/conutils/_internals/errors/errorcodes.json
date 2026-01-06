@@ -19,5 +19,12 @@
     },
     "ELMT": {
         "faulty frames": "Wrong frame format, shuld be:\n list[str] or list[list[str]]"
+    },
+    "CONS": {
+        "too many processes": "Number of processes cant be higher than cores"
+    },
+    "COMP": {
+        "cached frame": "The frame was already compiled\n use get_cached to get the compiled frame",
+        "not compiled": "The frame has not been compiled yet."
     }
 }
