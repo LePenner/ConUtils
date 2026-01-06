@@ -1,4 +1,4 @@
-from .commons import ObjDict, frame_type, line_type
+from .commons import ObjDict, frame_type
 
 
 class Mp_collector():

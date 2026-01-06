@@ -24,10 +24,14 @@ class Console(Container):
 
     def __init__(self,
                  overlap: bool = False,
-                 fps: int = 0,
+                 fps: int = 1000,
                  multiprocessing: bool | int = False,
                  debug: bool = False,
-                 **kwargs: Unpack[EntityKwargs]):
+                 logging: bool = False,
+                 ** kwargs: Unpack[EntityKwargs]):
+
+        if fps < 1 or fps > 1000:
+            raise RuntimeError
         self._stop_flag = False
         self.fps = fps
 
@@ -38,6 +42,7 @@ class Console(Container):
                 ethrow("CONS", "too many processes")
 
         self._processes = multiprocessing
+        self.logging = logging
         self.debug = debug
 
         # set default length and height to terminal
@@ -123,6 +128,8 @@ class Console(Container):
                 # checks for function update() in main file
                 if getattr(__main__, "update", None):
                     __main__.update()  # type:  ignore
+
+                # logic steps wont get skipped
                 accumulator -= dt_fixed
 
             if now - last_render_time >= dt_fixed:
@@ -132,8 +139,8 @@ class Console(Container):
 
                 if not self.debug:
                     print(frame.compile(), end="\r")
-                else:
-                    with open("out.txt", "a") as f:
+                if self.logging:
+                    with open(f"logs/log{self.__hash__()}.txt", "a") as f:
                         frametime = now - last_render_time
                         f.write(
                             f"[{datetime.datetime.now()}] frametime: "
@@ -142,4 +149,4 @@ class Console(Container):
 
                 last_render_time = now
 
-            await asyncio.sleep(0)
+            await asyncio.sleep(0)  # yielding control
