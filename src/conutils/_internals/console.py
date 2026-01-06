@@ -105,36 +105,41 @@ class Console(Container):
                 # _animation_loop() is protected
                 asyncio.create_task(child._animation_loop())  # type: ignore
 
-        # prpobably hogging the whole scheduler
-        # avg error of about 0.5 ms
-        def tick_generator():
-            t = time.perf_counter()
-            while True:
-                t += 1/self.fps
-                yield max(t - time.perf_counter(), 0)
-        tick = tick_generator()
+        last_loop_time = time.perf_counter()
+        last_render_time = last_loop_time
+        # keeps track of sync
+        accumulator = 0
+        dt_fixed = 1/self.fps
 
         while self._stop_flag == False:
 
-            time_tracker = time.perf_counter()
+            now = time.perf_counter()
+            dt = now - last_loop_time
+            last_loop_time = now
 
-            # lets user add custom functionality on runtime
-            # checks for function update() in main file
-            if getattr(__main__, "update", None):
-                __main__.update()  # type:  ignore
+            accumulator += dt
+            while accumulator >= dt_fixed:
+                # lets user add custom functionality on runtime
+                # checks for function update() in main file
+                if getattr(__main__, "update", None):
+                    __main__.update()  # type:  ignore
+                accumulator -= dt_fixed
 
-            if self.fps:
-                await asyncio.sleep(next(tick))
+            if now - last_render_time >= dt_fixed:
+                frame = Frame(self, self._processes)
+                for child in children:
+                    frame.collect(child)
 
-            frame = Frame(self, self._processes)
+                if not self.debug:
+                    print(frame.compile(), end="\r")
+                else:
+                    with open("out.txt", "a") as f:
+                        frametime = now - last_render_time
+                        f.write(
+                            f"[{datetime.datetime.now()}] frametime: "
+                            f"{frametime*1000:.2f} ms || {1/frametime:.2f} fps\n"
+                        )
 
-            for child in children:
-                frame.collect(child)
+                last_render_time = now
 
-            if not self.debug:
-                print(frame.compile(), end="\r")
-            else:
-                with open("out.txt", "a") as f:
-                    time_passed = time.perf_counter() - time_tracker
-                    f.write(
-                        f"[{datetime.datetime.now()}] frametime: {time_passed*1000:.2f} ms || {1/time_passed:.2f} fps\n")
+            await asyncio.sleep(0)
