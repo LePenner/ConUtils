@@ -3,7 +3,7 @@ import os
 import asyncio
 import time
 import datetime
-from multiprocessing import cpu_count, freeze_support, current_process, set_start_method
+from multiprocessing import cpu_count
 from typing import Unpack
 from .entity.elements import Animated
 from .entity.container import Container
@@ -17,20 +17,19 @@ class Console(Container):
 
     Define an `update` function to configure runtime behavior.
 
+    `multiprocessing` is slow as of now.
     Setting `debug` to `True` will disable the console output.
     """
 
-    _instance = None
-
     def __init__(self,
                  overlap: bool = False,
-                 fps: int = 1000,
+                 fps: int = 100000,
                  multiprocessing: bool | int = False,
                  debug: bool = False,
                  logging: bool = False,
                  ** kwargs: Unpack[EntityKwargs]):
 
-        if fps < 1 or fps > 1000:
+        if fps < 1 or fps > 100000:
             raise RuntimeError
         self._stop_flag = False
         self.fps = fps
@@ -86,11 +85,6 @@ class Console(Container):
 
     def run(self):
 
-        freeze_support()
-        if current_process().name != "MainProcess":
-            return
-
-        set_start_method("spawn", force=True)
         self.clear_console()
         self.hide_cursor()
 
@@ -112,6 +106,7 @@ class Console(Container):
 
         last_loop_time = time.perf_counter()
         last_render_time = last_loop_time
+        log_creation_time = last_loop_time
         # keeps track of sync
         accumulator = 0
         dt_fixed = 1/self.fps
@@ -139,8 +134,9 @@ class Console(Container):
 
                 if not self.debug:
                     print(frame.compile(), end="\r")
+
                 if self.logging:
-                    with open(f"logs/log{self.__hash__()}.txt", "a") as f:
+                    with open(f"logs/log{log_creation_time}.txt", "a") as f:
                         frametime = now - last_render_time
                         f.write(
                             f"[{datetime.datetime.now()}] frametime: "

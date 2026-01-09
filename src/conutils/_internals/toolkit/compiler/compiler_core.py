@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import __main__
 from ...errors import ethrow
-from .commons import ObjDict, frame_type, line_type
+from .commons import ObjDict, frame_type, line_type, PreComp
 from .multiproccesor import Mp_collector
 
 if TYPE_CHECKING:
@@ -10,33 +10,6 @@ if TYPE_CHECKING:
     from ...console import Console
 
 # frame>line>obj(pos, rep, tuple[bold, italic, strike_through], rgb(r,g,b)|None)
-
-
-class PreComp:
-
-    @staticmethod
-    def _binsert_index(obj: ObjDict, line: line_type) -> int:
-        x = obj["pos"]
-        lo = 0
-        hi = len(line)
-
-        while lo < hi:
-            mid = (lo + hi) // 2
-            if line[mid]["pos"] < x:
-                lo = mid + 1
-            else:
-                hi = mid
-
-        return lo
-
-    @staticmethod
-    def to_frame(obj: ObjDict, line: line_type):
-        """Calculates position for `obj` and places it in its location."""
-
-        line_index = PreComp._binsert_index(obj, line)
-
-        line.insert(
-            line_index, obj)
 
 
 class Comp:
@@ -175,7 +148,8 @@ class Frame:
 
         # multiprocessing enabled
         if mp_cores:
-            self._mp_collector = Mp_collector(mp_cores, self._frame.copy())
+            self._mp_collector = Mp_collector(
+                mp_cores, [lst.copy() for lst in self._frame])
         else:
             self._mp_collector = None
 
@@ -189,9 +163,12 @@ class Frame:
 
     def compile(self):
         if not self._cached_frame:
-            out = Comp.compile(self._frame, self._console)
-            self._cached_frame = out
-            return out
+            if self._mp_collector:
+                self._frame = self._mp_collector.process()
+            else:
+                out = Comp.compile(self._frame, self._console)
+                self._cached_frame = out
+                return out
         else:
             ethrow("COMP", "cached frame")
 
@@ -213,6 +190,5 @@ class Frame:
 
             if self._mp_collector:
                 self._mp_collector.submit(obj, index)
-
             else:
                 PreComp.to_frame(obj, line)

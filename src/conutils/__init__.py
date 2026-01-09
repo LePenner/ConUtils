@@ -1,6 +1,6 @@
 # conutils/
 
-"""ConUtils API. V 0.0.8b
+"""ConUtils API. V 0.0.9b
 
 `Console`, `Screen` and `Line` are all `Containers` to structure your console output.
 `Console` is the main screen and handles drawing `Elements`, add containers or `Elements`
