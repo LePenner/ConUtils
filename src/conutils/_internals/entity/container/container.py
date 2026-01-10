@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Unpack
 
+from .frame import Frame
 from ..entity import Entity, EntityKwargs
 from ..elements import Element
 from ...errors import ethrow
@@ -10,10 +11,16 @@ class Container(Entity):
     """simple container class with child/parent logic"""
 
     def __init__(self,
-                 overlap: bool = False, **kwargs: Unpack[EntityKwargs]):
+                 overlap: bool = False, frame: bool | Frame = False, **kwargs: Unpack[EntityKwargs]):
 
         self._children: list[Entity] = []
         self._overlap = overlap
+
+        if frame == True:
+            self._frame = Frame()
+        else:
+            
+            self._frame = frame
         super().__init__(**kwargs)
 
     def _set_display_rgb(self, rgb: tuple[int, int, int] | None = None):
