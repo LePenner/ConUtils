@@ -2,9 +2,8 @@ from __future__ import annotations
 import asyncio
 from typing import Unpack
 
-from conutils._internals.errors.errors import ethrow
-
 from ..entity import Entity, EntityKwargs
+from ...errors.errors import ethrow
 
 
 class Element(Entity):
@@ -25,7 +24,7 @@ class Animated(Element):
                  frametime: float = 100,
                  **kwargs: Unpack[EntityKwargs]):
         """frametime in ms"""
-        self._frames = self._get_proper_frames(frames)
+        self._frames = Animated._get_proper_frames(frames)
         # NOT PRECISE FOR LOW VALUES
         self._frametime = frametime / 1000  # frametime in milliseconds
         self._cur = 0
@@ -36,7 +35,8 @@ class Animated(Element):
     def __str__(self):
         return str(self._frames[self._cur])
 
-    def _get_proper_frames(self, frames: None | list[str] | list[list[str]]) -> list[list[str]]:
+    @staticmethod
+    def _get_proper_frames(frames: None | list[str] | list[list[str]]) -> list[list[str]]:
 
         if frames == None:
             return [[]]
