@@ -73,8 +73,6 @@ class Frame(Entity):
         width = min(max(corner_width, vert_width)*2, self.parent.width)
         height = min(max(corner_height, hori_height)*2, self.parent.height)
 
-        print(width, height)
-
         corner_parts: list[list[str]] = [[] for _ in range(4)]
 
         for y in range(height):
@@ -87,9 +85,7 @@ class Frame(Entity):
                 # and 2 3 2 3... if height_mod = 1
                 corner_parts[height_mod*2 + x % 2].append(
                     # applies pattern with matrix scaling
-                    self.corner[y % corner_height][x % corner_width])
-
-                # print(corner_parts)
+                    self.corner[y//2 % corner_height][x//2 % corner_width])
 
             # checking if the next line will fit
             # new line every 2 iterations of y
@@ -101,21 +97,39 @@ class Frame(Entity):
                 if width > 1:
                     corner_parts[height_mod*2 + 1].append("\n")
 
-        corners = ["".join(parts) for parts in corner_parts]
+        elements = ["".join(parts) for parts in corner_parts]
 
         pw = self.parent.width
-        w = min(width//2, corner_width)
+        w = max(width//2, corner_width)
         ph = self.parent.height
-        h = min(height//2, corner_height)
+        h = max(height//2, corner_height)
 
         offsets = [
+            # corner cords
             (0, 0),
             (pw - w, 0),
             (0, ph - h),
-            (pw - w, ph - h),
+            (pw - w, ph - h)
         ]
 
-        print(corners, offsets)
+        sides_offsets = [
+            # top | left | bot | right
+            (w, 0),
+            (0, h),
+            (w, ph-hori_height),
+            (pw-vert_width, h)
+        ]
+
+        for i in range(2):
+            if w < round(pw / 2):
+                elements.append("\n".join(tile*(pw-w*2)
+                                for tile in self.horrizontal_edge))
+                offsets.append(sides_offsets[i*2])
+
+            if h < round(ph/2):
+                elements.append("\n".join(self.vertical_edge
+                                for _ in range(ph - h*2)))
+                offsets.append(sides_offsets[i*2+1])
 
         for i, (x, y) in enumerate(offsets):
-            self.parent.add_child(Text(corners[i], x=x, y=y))
+            self.parent.add_child(Text(elements[i], x=x, y=y))
