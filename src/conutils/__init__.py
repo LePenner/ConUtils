@@ -19,6 +19,7 @@ from ._internals import Console
 from ._internals.toolkit import Color
 from ._internals.entity.elements import Spinner, Text, Log, Animated
 from ._internals.entity.container import Container
+from ._internals.entity.container import Frame
 
 LOGO = """  ,ad8888ba,
  d8"'    `"8b
@@ -32,5 +33,5 @@ Y8,   88        88
        `"Y8888Y"'
 """
 
-__all__ = ["Container", "Spinner", "Text", "Animated",
+__all__ = ["Container", "Spinner", "Text", "Animated", "Frame",
            "Log", "Console", "Color", "LOGO"]

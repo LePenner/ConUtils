@@ -26,5 +26,8 @@
     "COMP": {
         "cached frame": "The frame was already compiled\n use get_cached to get the compiled frame",
         "not compiled": "The frame has not been compiled yet."
+    },
+    "CONT": {
+        "frame already set": "A frame for your container was already specified\n use replace==True to overwrite the previous frame"
     }
 }

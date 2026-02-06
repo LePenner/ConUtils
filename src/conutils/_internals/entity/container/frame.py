@@ -1,14 +1,11 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
+
+from typing import Unpack
+from ..entity import EntityKwargs
+
 
 from ...errors import ethrow
 from ..elements import Text
-
-if TYPE_CHECKING:
-    from .container import Container
-
-from typing import Unpack
-from conutils._internals.entity.entity import EntityKwargs
 from ...errors import ethrow
 from ...entity import Entity
 
@@ -21,10 +18,31 @@ class Frame(Entity):
                  **kwargs: Unpack[EntityKwargs]):
 
         self._container = kwargs.get("parent")
+        self._parts: list[Text] = []
         super().__init__(**kwargs)
-        self.vertical_edge = vert_edge
-        self.horrizontal_edge = hori_edge
-        self.corner = corner
+        self.representation(vert_edge, hori_edge, corner)
+
+    @property
+    def parts(self):
+        return self._parts
+
+    @property
+    def vertical_edge(self):
+        return self._vertical_edge
+
+    @vertical_edge.setter
+    def vertical_edge(self, vertical_edge: str):
+        self.representation(vertical_edge,
+                            self._horrizontal_edge, self._corner)
+
+    @property
+    def horrizontal_edge(self):
+        return self._horrizontal_edge
+
+    @horrizontal_edge.setter
+    def horrizontal_edge(self, horrizontal_edge: str):
+        self.representation(self._vertical_edge,
+                            horrizontal_edge, self._corner)
 
     @property
     def corner(self):
@@ -32,23 +50,28 @@ class Frame(Entity):
 
     @corner.setter
     def corner(self, corner: str | list[str]):
+        self.representation(self._vertical_edge,
+                            self._horrizontal_edge, corner)
+
+    def representation(self, vert_edge: str, hori_edge: str, corner: str | list[str]):
         if type(corner) == str:
             self._corner = [corner]
+        if len(corner) == 0:
+            self._corner = " "
         else:
             self._corner = corner
-        self.presentation()
 
-    @property
-    def container(self):
-        return self.parent
+        self._vertical_edge = vert_edge
+        self._horrizontal_edge = hori_edge
 
-    @container.setter
-    def container(self, container: Container | None):
-        if container:
-            self.parent = container
-            self.presentation()
-        else:
-            self.parent = None
+        parent = self.parent
+        if parent:
+            if set(self.parts).intersection(set(parent.children)):
+                parent.remove_child(self)
+                parent.add_child(self)
+            self._presentation()
+
+    # ----- OVERWRITES -----
 
     @property
     def pos(self) -> tuple[int, int]:
@@ -58,7 +81,9 @@ class Frame(Entity):
     def pos(self, pos: tuple[int, int]):
         ethrow("FRAM", "read from Frame")
 
-    def presentation(self):
+    # ----- END -----
+
+    def _presentation(self):
         """Process presentation settings.
 
         Can only be called if a container/parent is set."""
@@ -131,5 +156,14 @@ class Frame(Entity):
                                 for _ in range(ph - h*2)))
                 offsets.append(sides_offsets[i*2+1])
 
+        self._parts = []
         for i, (x, y) in enumerate(offsets):
-            self.parent.add_child(Text(elements[i], x=x, y=y))
+            child = (Text(elements[i],
+                          x=x,
+                          y=y,
+                          color=self.color,
+                          bold=self.bold,
+                          strike_through=self.strike_through,
+                          italic=self.italic))
+            self.parent.add_child(child)
+            self._parts.append(child)

@@ -15,12 +15,8 @@ class Container(Entity):
 
         self._children: list[Entity] = []
         self._overlap = overlap
+        self._frame = frame
 
-        if frame == True:
-            self._frame = Frame()
-        else:
-            
-            self._frame = frame
         super().__init__(**kwargs)
 
     def _set_display_rgb(self, rgb: tuple[int, int, int] | None = None):
@@ -95,7 +91,13 @@ class Container(Entity):
 
     def remove_child(self, child: Entity):
         if child not in self._children:
-            ethrow("ETNY", "child not found")
+            ethrow("ENTY", "child not found")
+
+        if isinstance(child, Frame):
+            for component in child.parts:
+                self._children.remove(component)
+                component._parent = None
+
         self._children.remove(child)
         child._parent = None
 
@@ -112,3 +114,5 @@ class Container(Entity):
                 parent._parent = None
             self._parent = parent
             parent._children.append(self)
+
+    # ----- frame logic -----

@@ -11,5 +11,6 @@
 Screen and Line not implemented
 """
 from .container import Container
+from .frame import Frame
 
-__all__ = ["Container"]
+__all__ = ["Container", "Frame"]
